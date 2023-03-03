@@ -2,13 +2,13 @@
   <div class="pokedraw-container container rel">
     <PdcLogo />
     <div class="topic">
-      <h2 class="topic-pokemonName">題目: 勇基拉</h2>
-      <p class="topic-description">勇基拉是一隻拿著湯匙的怪咖寶可夢</p>
-      <p class="topic-color">主色: 黃色</p>
+      <h2 class="topic-pokemonName">題目: {{ pokemonName || "???" }}</h2>
+      <p class="topic-description">{{ pokemonDesc || "???" }}</p>
+      <p class="topic-color">主色: {{ pokemonColor || "???" }}</p>
     </div>
     <div class="sidebar">
       <div
-        v-for="color in colors"
+        v-for="color in paletteColors"
         :key="color"
         class="button"
         :style="{ background: color }"
@@ -36,35 +36,84 @@
     <div ref="canvasContainer" class="canvas-container">
       <canvas
         @touchmove.prevent
-        @pointerdown="handleMouseDown"
-        @pointermove="handleMouseMove"
-        @pointerup="handleMousUp"
+        @pointerdown.prevent="handleMouseDown"
+        @pointermove.prevent="handleMouseMove"
+        @pointerup.prevent="handleMousUp"
         ref="pokeCanvas"
         class="pokeCanvas"
       ></canvas>
     </div>
-    <div class="timeBar-outer"><div class="timeBar-inner"></div></div>
+    <div class="timeBar-outer">
+      <div
+        :style="{ width: Math.floor((secondsLeft / 60) * 100) + '%' }"
+        class="timeBar-inner"
+      ></div>
+    </div>
+    <BaseModal
+      :title="'遊戲規則'"
+      :content="'系統會隨機產生一種寶可夢，請在限時1分鐘以內畫出來!'"
+      :button-text="'我了解了'"
+      @button-callback="getPokemon"
+    />
   </div>
 </template>
 
 <script setup>
 import PdcLogo from "../components/PdcLogo.vue";
+import BaseModal from "../components/BaseModal.vue";
 import { ref, reactive, onMounted } from "vue";
+import axios from "axios";
+import useCanvas from "../composables/canvas.js";
+import usePokeApi from "../composables/pokeApi.js";
 
-const colors = reactive([
-  "#325BC5",
-  "#F42A35",
-  "#FAD0DE",
-  "#FFA200",
-  "#946D9B",
-  "#FFD500",
-  "#875E37",
-  "#A8BF12",
-  "#8E969B",
-  "#2EB52F",
-  "#000000",
-  "#00AAB5",
-]);
+const { paletteColors } = useCanvas();
+const { getLanguageContent, getColorChineseName } = usePokeApi();
+
+// 倒數計時
+let secondsLeft = ref(60);
+let timer = ref(null);
+
+function startTimer() {
+  timer = setInterval(() => {
+    if (secondsLeft.value <= 0) {
+      clearInterval(timer);
+      timesUp();
+      return;
+    }
+    secondsLeft.value--;
+  }, 1000);
+}
+function timesUp() {
+  console.log("時間到");
+}
+
+// 寶可夢
+let pokemonName = ref("");
+let pokemonDesc = ref("");
+let pokemonColor = ref("");
+
+function getPokemon() {
+  const randomId = getRandomNum(905);
+  axios
+    .get("https://pokeapi.co/api/v2/pokemon-species/" + randomId)
+    .then((res) => {
+      const names = res.data.names;
+      const descs = res.data.flavor_text_entries;
+      const color = res.data.color.name;
+
+      pokemonName.value = getLanguageContent(names, "zh-Hant").name;
+      pokemonColor.value = getColorChineseName(color);
+      const chDesc = getLanguageContent(descs, "zh-Hant").flavor_text;
+      pokemonDesc.value = chDesc
+        ? chDesc.replace(/\s+/g, "")
+        : getLanguageContent(descs, "en").flavor_text;
+
+      startTimer();
+    });
+}
+function getRandomNum(range) {
+  return Math.floor(Math.random() * range) + 1;
+}
 
 // 畫板相關
 const pokeCanvas = ref("pokeCanvas");
@@ -113,6 +162,9 @@ function saveHistory() {
   undoList.push(pokeCanvas.value.toDataURL());
 }
 function undo() {
+  if (undoList.length <= 1) {
+    return;
+  }
   redoList.push(undoList.pop());
   const img = new Image();
   img.src = undoList[undoList.length - 1];
@@ -122,6 +174,9 @@ function undo() {
   };
 }
 function redo() {
+  if (redoList.length <= 0) {
+    return;
+  }
   const img = new Image();
   img.src = redoList[redoList.length - 1];
   img.onload = () => {
@@ -168,9 +223,6 @@ onMounted(() => {
   position: absolute;
   top: 20px;
   left: 20px;
-}
-.pokeCanvas {
-  border: 1px solid red;
 }
 .sidebar {
   position: absolute;
@@ -219,9 +271,9 @@ onMounted(() => {
 }
 .timeBar-inner {
   background: #f4efd2;
-  width: 73%;
   height: 10px;
   border-radius: 15px;
+  transition: all 1s linear;
 }
 
 @media (min-width: 1800px) {
