@@ -16,20 +16,20 @@
       >
         <span v-show="currentColor === color" class="color-selected">✔</span>
       </div>
-      <div @click="undo" class="button button-border">
+      <div @click="undo" class="button button-function">
         <font-awesome-icon icon="fa-solid fa-rotate-left" />
       </div>
-      <div @click="redo" class="button button-border">
+      <div @click="redo" class="button button-function">
         <font-awesome-icon icon="fa-solid fa-rotate-right" />
       </div>
       <div
         :class="{ 'eraser-selected': currentColor === '#ffffff' }"
         @click="setColor('#ffffff')"
-        class="button button-border"
+        class="button button-function"
       >
         <font-awesome-icon icon="fa-solid fa-eraser" />
       </div>
-      <div @click="allClear" class="button button-border">
+      <div @click="allClear" class="button button-function">
         <font-awesome-icon icon="fa-regular fa-file" />
       </div>
     </div>
@@ -55,12 +55,20 @@
       :button-text="'我了解了'"
       @button-callback="getPokemon"
     />
+    <ResultModal
+      ref="resultModal"
+      :pokemon-img-url="pokemonImgUrl"
+      :pokemon-draw-url="pokemonDrawUrl"
+      @reset="reset"
+      @to-draw-history="toDrawHistory"
+    />
   </div>
 </template>
 
 <script setup>
 import PdcLogo from "../components/PdcLogo.vue";
 import BaseModal from "../components/BaseModal.vue";
+import ResultModal from "../components/ResultModal.vue";
 import { ref, reactive, onMounted } from "vue";
 import axios from "axios";
 import useCanvas from "../composables/canvas.js";
@@ -69,9 +77,20 @@ import usePokeApi from "../composables/pokeApi.js";
 const { paletteColors } = useCanvas();
 const { getLanguageContent, getColorChineseName } = usePokeApi();
 
+function reset() {
+  getPokemon();
+  secondsLeft.value = 3;
+  allClear();
+  setColor("#000000");
+}
+function toDrawHistory() {
+  console.log("toDrawHistory");
+}
+
 // 倒數計時
-let secondsLeft = ref(60);
+let secondsLeft = ref(3);
 let timer = ref(null);
+const resultModal = ref(null);
 
 function startTimer() {
   timer = setInterval(() => {
@@ -83,19 +102,27 @@ function startTimer() {
     secondsLeft.value--;
   }, 1000);
 }
+
 function timesUp() {
-  console.log("時間到");
+  ctx.globalCompositeOperation = "destination-over";
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
+  pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
+  resultModal.value.showModal();
 }
 
 // 寶可夢
+let pokemonId = ref("");
 let pokemonName = ref("");
 let pokemonDesc = ref("");
 let pokemonColor = ref("");
+let pokemonImgUrl = ref("");
+let pokemonDrawUrl = ref("");
 
 function getPokemon() {
-  const randomId = getRandomNum(905);
+  pokemonId.value = getRandomNum(905);
   axios
-    .get("https://pokeapi.co/api/v2/pokemon-species/" + randomId)
+    .get("https://pokeapi.co/api/v2/pokemon-species/" + pokemonId.value)
     .then((res) => {
       const names = res.data.names;
       const descs = res.data.flavor_text_entries;
@@ -107,6 +134,7 @@ function getPokemon() {
       pokemonDesc.value = chDesc
         ? chDesc.replace(/\s+/g, "")
         : getLanguageContent(descs, "en").flavor_text;
+      pokemonImgUrl.value = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId.value}.png`;
 
       startTimer();
     });
@@ -215,7 +243,7 @@ onMounted(() => {
   background: #fff;
 }
 .topic {
-  background: #163a38;
+  background: var(--dark-green);
   color: #fff;
   border-radius: 15px;
   padding: 1rem;
@@ -232,7 +260,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 50px 50px;
   gap: 1rem;
-  background: #f4efd2;
+  background: var(--sand);
   padding: 1rem;
   border-radius: 20px;
 }
@@ -245,9 +273,9 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
 }
-.button-border {
+.button-function {
   background: #d9d9d9;
-  color: #525252;
+  color: var(--dark-grey-text);
   font-size: 1.5rem;
 }
 .color-selected {
@@ -258,7 +286,7 @@ onMounted(() => {
   border: 2px solid #008000;
 }
 .timeBar-outer {
-  background: #449641;
+  background: var(--green);
   width: 95%;
   height: 20px;
   border-radius: 15px;
@@ -270,7 +298,7 @@ onMounted(() => {
   padding: 0 5px;
 }
 .timeBar-inner {
-  background: #f4efd2;
+  background: var(--sand);
   height: 10px;
   border-radius: 15px;
   transition: all 1s linear;

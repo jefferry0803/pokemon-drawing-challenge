@@ -13,12 +13,7 @@
         </div>
         <div class="modal-body fs-5">{{ content }}</div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-primary btn-lg myBtn"
-            data-bs-dismiss="modal"
-            @click="handleClick"
-          >
+          <button type="button" class="btn btn-lg myBtn" @click="handleClick">
             {{ buttonText }}
           </button>
         </div>
@@ -41,6 +36,7 @@ const emit = defineEmits(["buttonCallback"]);
 const modal = ref(null);
 
 function handleClick() {
+  modal.value.hide();
   emit("buttonCallback");
 }
 
@@ -59,10 +55,11 @@ onMounted(() => {
   justify-content: center;
 }
 .myBtn {
-  background: #449641;
+  background: var(--green);
+  color: #fff;
 }
 .modal-content {
-  background: #f4efd2;
-  color: #525252;
+  background: var(--sand);
+  color: var(--dark-grey-text);
 }
 </style>

@@ -21,7 +21,12 @@ import { RouterView } from "vue-router";
 
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC&family=Roboto&display=swap");
-
+:root {
+  --dark-green: #163a38;
+  --green: #449641;
+  --sand: #f4efd2;
+  --dark-grey-text: #525252;
+}
 body {
   margin: 0;
   padding: 0;
