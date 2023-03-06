@@ -9,13 +9,15 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-2" id="myModalLabel">{{ title }}</h1>
+          <h1 class="modal-title fs-2" id="myModalLabel">
+            <slot name="title">標題</slot>
+          </h1>
         </div>
-        <div class="modal-body fs-5">{{ content }}</div>
+        <div class="modal-body fs-5"><slot name="content">內容</slot></div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-lg myBtn" @click="handleClick">
-            {{ buttonText }}
-          </button>
+          <slot name="footer-buttons"
+            ><button class="btn btn-secondary">按鈕一</button></slot
+          >
         </div>
       </div>
     </div>
@@ -24,25 +26,24 @@
 
 <script setup>
 import { Modal } from "bootstrap";
-import { ref, onMounted } from "vue";
-
-const props = defineProps({
-  title: String,
-  content: String,
-  buttonText: String,
-});
-const emit = defineEmits(["buttonCallback"]);
+import { ref, onMounted, onUnmounted } from "vue";
 
 const modal = ref(null);
 
-function handleClick() {
-  modal.value.hide();
-  emit("buttonCallback");
+function showModal() {
+  modal.value.show();
 }
+function hideModal() {
+  modal.value.hide();
+}
+
+defineExpose({ showModal, hideModal });
 
 onMounted(() => {
   modal.value = new Modal("#myModal");
-  modal.value.show();
+});
+onUnmounted(() => {
+  hideModal();
 });
 </script>
 
@@ -53,10 +54,6 @@ onMounted(() => {
 }
 .modal-footer {
   justify-content: center;
-}
-.myBtn {
-  background: var(--green);
-  color: #fff;
 }
 .modal-content {
   background: var(--sand);

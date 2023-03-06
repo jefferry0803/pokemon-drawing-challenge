@@ -49,12 +49,17 @@
         class="timeBar-inner"
       ></div>
     </div>
-    <BaseModal
-      :title="'遊戲規則'"
-      :content="'系統會隨機產生一種寶可夢，請在限時1分鐘以內畫出來!'"
-      :button-text="'我了解了'"
-      @button-callback="getPokemon"
-    />
+    <BaseModal ref="startModal">
+      <template #title>遊戲規則</template>
+      <template #content
+        >系統會隨機產生一種寶可夢，請在限時1分鐘以內畫出來!</template
+      >
+      <template #footer-buttons>
+        <button @click="getPokemon" type="button" class="btn btn-lg green-btn">
+          我了解了
+        </button>
+      </template>
+    </BaseModal>
     <ResultModal
       ref="resultModal"
       :pokemon-img-url="pokemonImgUrl"
@@ -69,7 +74,7 @@
 import PdcLogo from "../components/PdcLogo.vue";
 import BaseModal from "../components/BaseModal.vue";
 import ResultModal from "../components/ResultModal.vue";
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import useCanvas from "../composables/canvas.js";
 import usePokeApi from "../composables/pokeApi.js";
@@ -79,7 +84,7 @@ const { getLanguageContent, getColorChineseName } = usePokeApi();
 
 function reset() {
   getPokemon();
-  secondsLeft.value = 3;
+  secondsLeft.value = 60;
   allClear();
   setColor("#000000");
 }
@@ -88,14 +93,15 @@ function toDrawHistory() {
 }
 
 // 倒數計時
-let secondsLeft = ref(3);
+let secondsLeft = ref(60);
 let timer = ref(null);
+const startModal = ref(null);
 const resultModal = ref(null);
 
 function startTimer() {
-  timer = setInterval(() => {
+  timer.value = setInterval(() => {
     if (secondsLeft.value <= 0) {
-      clearInterval(timer);
+      clearInterval(timer.value);
       timesUp();
       return;
     }
@@ -104,6 +110,7 @@ function startTimer() {
 }
 
 function timesUp() {
+  handleMousUp();
   ctx.globalCompositeOperation = "destination-over";
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
@@ -120,6 +127,7 @@ let pokemonImgUrl = ref("");
 let pokemonDrawUrl = ref("");
 
 function getPokemon() {
+  startModal.value.hideModal();
   pokemonId.value = getRandomNum(905);
   axios
     .get("https://pokeapi.co/api/v2/pokemon-species/" + pokemonId.value)
@@ -131,9 +139,7 @@ function getPokemon() {
       pokemonName.value = getLanguageContent(names, "zh-Hant").name;
       pokemonColor.value = getColorChineseName(color);
       const chDesc = getLanguageContent(descs, "zh-Hant").flavor_text;
-      pokemonDesc.value = chDesc
-        ? chDesc.replace(/\s+/g, "")
-        : getLanguageContent(descs, "en").flavor_text;
+      pokemonDesc.value = chDesc ? chDesc.replace(/\s+/g, "") : "";
       pokemonImgUrl.value = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId.value}.png`;
 
       startTimer();
@@ -169,6 +175,12 @@ function handleMouseDown(e) {
   isMouseDown.value = true;
   lastX = e.offsetX;
   lastY = e.offsetY;
+  if (isMouseDown.value) {
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+  }
 }
 function handleMouseMove(e) {
   if (isMouseDown.value) {
@@ -229,9 +241,13 @@ function setColor(color) {
 
 window.addEventListener("resize", resizeCanvas);
 onMounted(() => {
+  startModal.value.showModal();
   resizeCanvas();
   initCanvas();
   saveHistory();
+});
+onUnmounted(() => {
+  clearInterval(timer.value);
 });
 </script>
 
@@ -272,6 +288,10 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.green-btn {
+  background: var(--green);
+  color: #fff;
 }
 .button-function {
   background: #d9d9d9;

@@ -4,13 +4,26 @@
     <div class="loginForm-container">
       <h1>登入</h1>
       <div class="loginForm-inputGroups my-3">
+        <div v-if="isAlertShow" class="alert alert-danger" role="alert">
+          {{ alertMessage }}
+        </div>
         <div class="loginForm-inputGroup my-3">
-          <label class="loginForm-label" for="username">帳號</label
-          ><input class="loginForm-input" id="username" type="email" />
+          <label class="loginForm-label" for="username">信箱</label
+          ><input
+            v-model="email"
+            class="loginForm-input"
+            id="username"
+            type="email"
+          />
         </div>
         <div class="loginForm-inputGroup my-3">
           <label class="loginForm-label" for="password">密碼</label
-          ><input class="loginForm-input" id="password" type="password" />
+          ><input
+            v-model="password"
+            class="loginForm-input"
+            id="password"
+            type="password"
+          />
         </div>
       </div>
       <div class="loginForm-buttons">
@@ -37,9 +50,30 @@
 <script setup>
 import PdcLogo from "../components/PdcLogo.vue";
 import BaseButton from "../components/BaseButton.vue";
+import { useUserStore } from "../stores/user";
+import { useRouter } from "vue-router";
+import { ref } from "vue";
+
+const userStore = useUserStore();
+const router = useRouter();
+
+let email = ref("");
+let password = ref("");
+let isAlertShow = ref(false);
+let alertMessage = ref("");
 
 function userLogin() {
-  console.log("登入");
+  userStore
+    .login(email.value, password.value)
+    .then((res) => {
+      isAlertShow.value = false;
+      userStore.setUser(res.data.localId, res.data.idToken, res.data.expiresIn);
+      router.push("/pokedraw");
+    })
+    .catch((e) => {
+      alertMessage.value = "信箱或密碼錯誤";
+      isAlertShow.value = true;
+    });
 }
 
 function gusetLogin() {

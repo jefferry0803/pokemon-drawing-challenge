@@ -46,7 +46,7 @@
 
 <script setup>
 import { Modal } from "bootstrap";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 const emit = defineEmits(["reset", "toDrawHistory"]);
 
@@ -69,9 +69,15 @@ const modal = ref(null);
 function showModal() {
   modal.value.show();
 }
+function hideModal() {
+  modal.value.hide();
+}
 
 onMounted(() => {
   modal.value = new Modal("#resultModal");
+});
+onUnmounted(() => {
+  hideModal();
 });
 </script>
 
