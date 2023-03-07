@@ -67,25 +67,10 @@ function userLogin() {
   isLoading.value = true;
   userStore
     .login(email.value, password.value)
-    .then((res) => {
+    .then(() => {
       isLoading.value = false;
       isAlertShow.value = false;
-      const email = res.data.email;
-      const username = email.substring(0, email.search("@"));
 
-      const expiresIn = +res.data.expiresIn * 1000;
-      const expirationDate = new Date().getTime() + expiresIn;
-
-      localStorage.setItem("username", username);
-      localStorage.setItem("userId", res.data.localId);
-      localStorage.setItem("token", res.data.idToken);
-      localStorage.setItem("tokenExpiration", expirationDate);
-
-      userStore.logoutTimer = setTimeout(() => {
-        userStore.logout();
-      }, expiresIn);
-
-      userStore.setUser(username, res.data.localId, res.data.idToken);
       router.push("/pokedraw");
     })
     .catch((e) => {
@@ -103,19 +88,6 @@ function guestLogin() {
       isLoading.value = false;
       isAlertShow.value = false;
 
-      const expiresIn = +res.data.expiresIn * 1000;
-      const expirationDate = new Date().getTime() + expiresIn;
-
-      localStorage.setItem("username", "訪客");
-      localStorage.setItem("userId", res.data.localId);
-      localStorage.setItem("token", res.data.idToken);
-      localStorage.setItem("tokenExpiration", expirationDate);
-
-      userStore.logoutTimer = setTimeout(() => {
-        userStore.logout();
-      }, expiresIn);
-
-      userStore.setUser("訪客", res.data.localId, res.data.idToken);
       router.push("/pokedraw");
     })
     .catch((e) => {
