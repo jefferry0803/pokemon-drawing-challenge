@@ -1,6 +1,5 @@
 <template>
   <div class="container-sm login-container rel">
-    <PdcLogo />
     <div class="loginForm-container">
       <h1>登入</h1>
       <div class="loginForm-inputGroups my-3">
@@ -40,16 +39,17 @@
         <BaseButton
           :background-color="'#DDDEDD'"
           :text="'以訪客登入'"
-          @click-callback="gusetLogin"
+          @click-callback="guestLogin"
         />
       </div>
     </div>
+    <BaseSpinner v-if="isLoading" />
   </div>
 </template>
 
 <script setup>
-import PdcLogo from "../components/PdcLogo.vue";
 import BaseButton from "../components/BaseButton.vue";
+import BaseSpinner from "../components/BaseSpinner.vue";
 import { useUserStore } from "../stores/user";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
@@ -61,23 +61,68 @@ let email = ref("");
 let password = ref("");
 let isAlertShow = ref(false);
 let alertMessage = ref("");
+let isLoading = ref(false);
 
 function userLogin() {
+  isLoading.value = true;
   userStore
     .login(email.value, password.value)
     .then((res) => {
+      isLoading.value = false;
       isAlertShow.value = false;
-      userStore.setUser(res.data.localId, res.data.idToken, res.data.expiresIn);
+      const email = res.data.email;
+      const username = email.substring(0, email.search("@"));
+
+      const expiresIn = +res.data.expiresIn * 1000;
+      const expirationDate = new Date().getTime() + expiresIn;
+
+      localStorage.setItem("username", username);
+      localStorage.setItem("userId", res.data.localId);
+      localStorage.setItem("token", res.data.idToken);
+      localStorage.setItem("tokenExpiration", expirationDate);
+
+      userStore.logoutTimer = setTimeout(() => {
+        userStore.logout();
+      }, expiresIn);
+
+      userStore.setUser(username, res.data.localId, res.data.idToken);
       router.push("/pokedraw");
     })
     .catch((e) => {
+      isLoading.value = false;
       alertMessage.value = "信箱或密碼錯誤";
       isAlertShow.value = true;
     });
 }
 
-function gusetLogin() {
-  console.log("訪客登入");
+function guestLogin() {
+  isLoading.value = true;
+  userStore
+    .guestLogin()
+    .then((res) => {
+      isLoading.value = false;
+      isAlertShow.value = false;
+
+      const expiresIn = +res.data.expiresIn * 1000;
+      const expirationDate = new Date().getTime() + expiresIn;
+
+      localStorage.setItem("username", "訪客");
+      localStorage.setItem("userId", res.data.localId);
+      localStorage.setItem("token", res.data.idToken);
+      localStorage.setItem("tokenExpiration", expirationDate);
+
+      userStore.logoutTimer = setTimeout(() => {
+        userStore.logout();
+      }, expiresIn);
+
+      userStore.setUser("訪客", res.data.localId, res.data.idToken);
+      router.push("/pokedraw");
+    })
+    .catch((e) => {
+      isLoading.value = false;
+      alertMessage.value = "發生錯誤，請稍後再試";
+      isAlertShow.value = true;
+    });
 }
 </script>
 
@@ -87,7 +132,7 @@ function gusetLogin() {
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
   border-radius: 49px;
   background: #fff;
-  padding: 2rem 0 5rem 0;
+  padding: 2rem 2rem 5rem 2rem;
 }
 .loginForm-container {
   display: flex;
@@ -111,6 +156,7 @@ function gusetLogin() {
 .loginForm-label,
 .loginForm-input {
   font-size: 2rem;
+  width: 100%;
 }
 .loginForm-label {
   margin-right: 1rem;
@@ -120,8 +166,13 @@ function gusetLogin() {
 }
 
 @media (min-width: 1200px) {
-  .container-sm {
+  .login-container {
     max-width: 960px;
+  }
+}
+@media (max-width: 576px) {
+  .login-container {
+    max-width: 90%;
   }
 }
 </style>

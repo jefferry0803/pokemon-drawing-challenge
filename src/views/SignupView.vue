@@ -1,6 +1,5 @@
 <template>
   <div class="container-sm signup-container rel">
-    <PdcLogo />
     <div class="toLogin-container">
       <router-link class="toLogin" to="/login">← 返回登入頁</router-link>
     </div>
@@ -59,7 +58,6 @@
 </template>
 
 <script setup>
-import PdcLogo from "../components/PdcLogo.vue";
 import BaseButton from "../components/BaseButton.vue";
 import BaseModal from "../components/BaseModal.vue";
 import BaseSpinner from "../components/BaseSpinner.vue";
@@ -120,7 +118,7 @@ function signup() {
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
   border-radius: 49px;
   background: #fff;
-  padding: 2rem 0 5rem 2rem;
+  padding: 2rem 2rem 5rem 2rem;
 }
 .signupForm-container {
   display: flex;
@@ -138,6 +136,7 @@ function signup() {
 .signupForm-label,
 .signupForm-input {
   font-size: 2rem;
+  width: 100%;
 }
 .signupForm-label {
   margin-right: 1rem;
@@ -155,8 +154,13 @@ function signup() {
 }
 
 @media (min-width: 1200px) {
-  .container-sm {
+  .signup-container {
     max-width: 960px;
+  }
+}
+@media (max-width: 576px) {
+  .signup-container {
+    max-width: 90%;
   }
 }
 </style>

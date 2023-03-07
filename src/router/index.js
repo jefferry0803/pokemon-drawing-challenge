@@ -6,7 +6,7 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "landingPage",
+      name: "home",
       redirect: "/login",
     },
     {
@@ -25,7 +25,19 @@ const router = createRouter({
       path: "/pokedraw",
       name: "pokedraw",
       component: () => import("../views/PokeDraw.vue"),
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/history",
+      name: "history",
+      component: () => import("../views/DrawHistory.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/gallery",
+      name: "gallery",
+      component: () => import("../views/PublicGallery.vue"),
+      meta: { requiresAuth: true },
     },
   ],
 });

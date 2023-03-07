@@ -1,6 +1,6 @@
 <template>
   <div class="pokedraw-container container rel">
-    <PdcLogo />
+    <NavBar :username="userStore.username" />
     <div class="topic">
       <h2 class="topic-pokemonName">題目: {{ pokemonName || "???" }}</h2>
       <p class="topic-description">{{ pokemonDesc || "???" }}</p>
@@ -71,16 +71,18 @@
 </template>
 
 <script setup>
-import PdcLogo from "../components/PdcLogo.vue";
 import BaseModal from "../components/BaseModal.vue";
 import ResultModal from "../components/ResultModal.vue";
 import { ref, reactive, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import useCanvas from "../composables/canvas.js";
 import usePokeApi from "../composables/pokeApi.js";
+import NavBar from "../components/NavBar.vue";
+import { useUserStore } from "../stores/user";
 
 const { paletteColors } = useCanvas();
 const { getLanguageContent, getColorChineseName } = usePokeApi();
+const userStore = useUserStore();
 
 function reset() {
   getPokemon();
@@ -169,7 +171,7 @@ function initCanvas() {
 }
 function resizeCanvas() {
   pokeCanvas.value.width = canvasContainer.value.getBoundingClientRect().width;
-  pokeCanvas.value.height = window.innerHeight * 0.7;
+  pokeCanvas.value.height = window.innerHeight * 0.8;
 }
 function handleMouseDown(e) {
   isMouseDown.value = true;
@@ -327,6 +329,11 @@ onUnmounted(() => {
 @media (min-width: 1800px) {
   .pokedraw-container {
     max-width: 1600px;
+  }
+}
+@media (max-width: 576px) {
+  .pokedraw-container {
+    max-width: 90%;
   }
 }
 </style>

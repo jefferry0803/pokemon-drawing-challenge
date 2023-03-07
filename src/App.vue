@@ -1,9 +1,6 @@
-<script setup>
-import { RouterView } from "vue-router";
-</script>
-
 <template>
-  <div class="routerView-container">
+  <div class="app-vue">
+    <PdcLogo />
     <RouterView />
     <div class="background-reference">
       Image by
@@ -14,6 +11,16 @@ import { RouterView } from "vue-router";
     </div>
   </div>
 </template>
+
+<script setup>
+import { RouterView } from "vue-router";
+import PdcLogo from "./components/PdcLogo.vue";
+import { useUserStore } from "./stores/user";
+
+const userStore = useUserStore();
+
+userStore.autoLogin();
+</script>
 
 <style lang="scss">
 @import "bootstrap/scss/bootstrap";
@@ -42,12 +49,14 @@ a {
 </style>
 
 <style scoped>
-.routerView-container {
+.app-vue {
   min-height: 100vh;
   background-image: url(./assets/jungle_background.jpg);
   background-size: cover;
   background-repeat: no-repeat;
+  background-position: center;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
