@@ -64,6 +64,7 @@
       ref="resultModal"
       :pokemon-img-url="pokemonImgUrl"
       :pokemon-draw-url="pokemonDrawUrl"
+      :pokemon-name="pokemonName"
       @reset="reset"
       @to-draw-history="toDrawHistory"
     />
@@ -79,11 +80,15 @@ import useCanvas from "../composables/canvas.js";
 import usePokeApi from "../composables/pokeApi.js";
 import NavBar from "../components/NavBar.vue";
 import { useUserStore } from "../stores/user";
+import db from "../firebase/index";
+import { collection, addDoc } from "firebase/firestore";
+import router from "../router";
 
 const { paletteColors } = useCanvas();
 const { getLanguageContent, getColorChineseName } = usePokeApi();
 const userStore = useUserStore();
 
+// 遊戲結束相關
 function reset() {
   getPokemon();
   secondsLeft.value = 60;
@@ -91,7 +96,19 @@ function reset() {
   setColor("#000000");
 }
 function toDrawHistory() {
-  console.log("toDrawHistory");
+  router.push("/history");
+}
+function saveResult() {
+  if (userStore.token) {
+    // 是登入的使用者就儲存繪畫紀錄到firebase
+    return addDoc(collection(db, "draw-history"), {
+      paintingUrl: pokemonDrawUrl.value,
+      pokemonName: pokemonName.value,
+      userId: userStore.userId,
+      username: userStore.username,
+      isShared: false,
+    });
+  }
 }
 
 // 倒數計時
@@ -111,12 +128,13 @@ function startTimer() {
   }, 1000);
 }
 
-function timesUp() {
+async function timesUp() {
   handleMousUp();
   ctx.globalCompositeOperation = "destination-over";
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
   pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
+  await saveResult();
   resultModal.value.showModal();
 }
 

@@ -81,20 +81,8 @@ function userLogin() {
 }
 
 function guestLogin() {
-  isLoading.value = true;
-  userStore
-    .guestLogin()
-    .then((res) => {
-      isLoading.value = false;
-      isAlertShow.value = false;
-
-      router.push("/pokedraw");
-    })
-    .catch((e) => {
-      isLoading.value = false;
-      alertMessage.value = "發生錯誤，請稍後再試";
-      isAlertShow.value = true;
-    });
+  userStore.guestLogin();
+  router.push("/pokedraw");
 }
 </script>
 

@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    username: "",
+    username: "訪客",
     userId: "",
     token: "",
     logoutTimer: "",
@@ -50,24 +50,7 @@ export const useUserStore = defineStore("user", {
       });
     },
     guestLogin() {
-      const data = { returnSecureToken: true };
-      const url =
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC-mWBQB9BMbFZsR5DG0fxiNnLIq2e5fYM";
-      return axios.post(url, data).then((res) => {
-        const expiresIn = +res.data.expiresIn * 1000;
-        const expirationDate = new Date().getTime() + expiresIn;
-
-        localStorage.setItem("username", "訪客");
-        localStorage.setItem("userId", res.data.localId);
-        localStorage.setItem("token", res.data.idToken);
-        localStorage.setItem("tokenExpiration", expirationDate);
-
-        this.logoutTimer = setTimeout(() => {
-          this.logout();
-        }, expiresIn);
-
-        this.setUser("訪客", res.data.localId, res.data.idToken);
-      });
+      this.setUser("訪客", null, null);
     },
     autoLogin() {
       const username = localStorage.getItem("username");
@@ -104,7 +87,7 @@ export const useUserStore = defineStore("user", {
 
       this.setUser(null, null, null);
 
-      router.push("/login");
+      router.replace("/login");
     },
   },
 });

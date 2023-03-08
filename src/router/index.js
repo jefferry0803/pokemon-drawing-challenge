@@ -25,7 +25,7 @@ const router = createRouter({
       path: "/pokedraw",
       name: "pokedraw",
       component: () => import("../views/PokeDraw.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: "/history",
@@ -37,7 +37,7 @@ const router = createRouter({
       path: "/gallery",
       name: "gallery",
       component: () => import("../views/PublicGallery.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
   ],
 });

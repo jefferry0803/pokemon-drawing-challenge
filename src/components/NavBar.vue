@@ -6,7 +6,7 @@
         <li class="navButton">
           <router-link to="/pokedraw">前往繪畫</router-link>
         </li>
-        <li class="navButton">
+        <li class="navButton" v-if="userStore.token">
           <router-link to="/history">繪畫紀錄</router-link>
         </li>
         <li class="navButton">
@@ -56,7 +56,7 @@ ul {
   position: relative;
   border: 3px solid #000;
   border-radius: 15px;
-  background: #ffcc03;
+  background: var(--pokemon-yellow);
   padding: 0.5rem;
   cursor: pointer;
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
@@ -83,7 +83,7 @@ ul {
   transition: 0.25s all ease;
 }
 .navButton:hover {
-  box-shadow: inset 150px 0 0 0 #386abb;
+  box-shadow: inset 150px 0 0 0 var(--pokemon-blue);
 }
 .navButton:hover > a {
   color: #fff;

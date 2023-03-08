@@ -1,11 +1,11 @@
 <template>
-  <!-- Modal -->
   <div
     class="modal fade"
     id="resultModal"
     tabindex="-1"
     aria-labelledby="resultModalLabel"
     aria-hidden="true"
+    data-bs-backdrop="static"
   >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -18,14 +18,21 @@
             <img class="img" :src="pokemonImgUrl" alt="" />
           </div>
           <div class="draw-container">
-            <h2 class="pic-title">這是你畫的</h2>
+            <h2 class="pic-title">你畫這樣</h2>
             <img class="img" :src="pokemonDrawUrl" alt="" />
           </div>
         </div>
         <div class="modal-footer">
           <button
             type="button"
-            class="btn btn-lg green-btn"
+            class="btn btn-lg btn-success"
+            @click="downloadDraw"
+          >
+            下載圖畫
+          </button>
+          <button
+            type="button"
+            class="btn btn-lg btn-success"
             data-bs-dismiss="modal"
             @click="reset"
           >
@@ -34,7 +41,7 @@
           <button
             @click="toDrawHistory"
             type="button"
-            class="btn btn-lg btn-secondary"
+            class="btn btn-lg btn-success"
           >
             前往繪畫記錄
           </button>
@@ -53,6 +60,7 @@ const emit = defineEmits(["reset", "toDrawHistory"]);
 const props = defineProps({
   pokemonImgUrl: String,
   pokemonDrawUrl: String,
+  pokemonName: String,
 });
 
 defineExpose({ showModal });
@@ -62,6 +70,12 @@ function reset() {
 }
 function toDrawHistory() {
   emit("toDrawHistory");
+}
+function downloadDraw() {
+  let a = document.createElement("a");
+  a.href = props.pokemonDrawUrl;
+  a.download = props.pokemonName || "default.png";
+  a.dispatchEvent(new MouseEvent("click"));
 }
 
 const modal = ref(null);
