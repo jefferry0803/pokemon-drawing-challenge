@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import NavBar from "../components/NavBar.vue";
 import { useUserStore } from "../stores/user";
 import { collection, query, where, getDocs } from "firebase/firestore";

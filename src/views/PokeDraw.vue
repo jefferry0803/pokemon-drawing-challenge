@@ -74,7 +74,7 @@
 <script setup>
 import BaseModal from "../components/BaseModal.vue";
 import ResultModal from "../components/ResultModal.vue";
-import { ref, reactive, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import useCanvas from "../composables/canvas.js";
 import usePokeApi from "../composables/pokeApi.js";
@@ -130,9 +130,9 @@ function startTimer() {
 
 async function timesUp() {
   handleMousUp();
-  ctx.globalCompositeOperation = "destination-over";
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
+  ctx.value.globalCompositeOperation = "destination-over";
+  ctx.value.fillStyle = "#fff";
+  ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
   pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
   await saveResult();
   resultModal.value.showModal();
@@ -170,22 +170,22 @@ function getRandomNum(range) {
 }
 
 // 畫板相關
-const pokeCanvas = ref("pokeCanvas");
-let ctx = reactive({});
+const pokeCanvas = ref(null);
+let ctx = ref(null);
 const canvasContainer = ref("canvasContainer");
 let isMouseDown = ref(false);
 let lastX = 0;
 let lastY = 0;
 let currentColor = ref("#000000");
-let undoList = reactive([]);
-let redoList = reactive([]);
+let undoList = ref([]);
+let redoList = ref([]);
 
 function initCanvas() {
-  ctx = pokeCanvas.value.getContext("2d");
-  ctx.strokeStyle = currentColor;
-  ctx.lineWidth = 10;
-  ctx.lineJoin = "round";
-  ctx.lineCap = "round";
+  ctx.value = pokeCanvas.value.getContext("2d");
+  ctx.value.strokeStyle = currentColor;
+  ctx.value.lineWidth = 10;
+  ctx.value.lineJoin = "round";
+  ctx.value.lineCap = "round";
 }
 function resizeCanvas() {
   pokeCanvas.value.width = canvasContainer.value.getBoundingClientRect().width;
@@ -196,18 +196,18 @@ function handleMouseDown(e) {
   lastX = e.offsetX;
   lastY = e.offsetY;
   if (isMouseDown.value) {
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
+    ctx.value.beginPath();
+    ctx.value.moveTo(lastX, lastY);
+    ctx.value.lineTo(e.offsetX, e.offsetY);
+    ctx.value.stroke();
   }
 }
 function handleMouseMove(e) {
   if (isMouseDown.value) {
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
+    ctx.value.beginPath();
+    ctx.value.moveTo(lastX, lastY);
+    ctx.value.lineTo(e.offsetX, e.offsetY);
+    ctx.value.stroke();
 
     lastX = e.offsetX;
     lastY = e.offsetY;
@@ -218,44 +218,56 @@ function handleMousUp() {
   saveHistory();
 }
 function saveHistory() {
-  redoList = [];
-  undoList.push(pokeCanvas.value.toDataURL());
+  redoList.value = [];
+  undoList.value.push(pokeCanvas.value.toDataURL());
 }
 function undo() {
-  if (undoList.length <= 1) {
+  if (undoList.value.length <= 1) {
     return;
   }
-  redoList.push(undoList.pop());
+  redoList.value.push(undoList.value.pop());
   const img = new Image();
-  img.src = undoList[undoList.length - 1];
+  img.src = undoList.value[undoList.value.length - 1];
   img.onload = () => {
     allClear();
-    ctx.drawImage(img, 0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
+    ctx.value.drawImage(
+      img,
+      0,
+      0,
+      pokeCanvas.value.width,
+      pokeCanvas.value.height
+    );
   };
 }
 function redo() {
-  if (redoList.length <= 0) {
+  if (redoList.value.length <= 0) {
     return;
   }
   const img = new Image();
-  img.src = redoList[redoList.length - 1];
+  img.src = redoList.value[redoList.value.length - 1];
   img.onload = () => {
     allClear();
-    ctx.drawImage(img, 0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
-    undoList.push(redoList.pop());
+    ctx.value.drawImage(
+      img,
+      0,
+      0,
+      pokeCanvas.value.width,
+      pokeCanvas.value.height
+    );
+    undoList.value.push(redoList.value.pop());
   };
 }
 function allClear() {
-  ctx.clearRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
+  ctx.value.clearRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
 }
 function setColor(color) {
   currentColor.value = color;
-  ctx.strokeStyle = color;
+  ctx.value.strokeStyle = color;
 
   if (color === "#ffffff") {
-    ctx.lineWidth = 50;
+    ctx.value.lineWidth = 50;
   } else {
-    ctx.lineWidth = 10;
+    ctx.value.lineWidth = 10;
   }
 }
 
