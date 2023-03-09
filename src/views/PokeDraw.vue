@@ -96,7 +96,7 @@ function reset() {
   setColor("#000000");
 }
 function toDrawHistory() {
-  router.push("/history");
+  router.push({ path: "/history" });
 }
 function saveResult() {
   if (userStore.token) {
@@ -280,6 +280,7 @@ onMounted(() => {
 });
 onUnmounted(() => {
   clearInterval(timer.value);
+  window.removeEventListener("resize", resizeCanvas);
 });
 </script>
 

@@ -28,7 +28,7 @@
             class="btn btn-lg btn-success"
             @click="downloadDraw"
           >
-            下載圖畫
+            下載保存
           </button>
           <button
             type="button"

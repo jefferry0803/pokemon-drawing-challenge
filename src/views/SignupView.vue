@@ -45,7 +45,7 @@
       <template #content>點選確認返回登入頁</template>
       <template #footer-buttons>
         <button
-          @click="router.push('/login')"
+          @click="router.push({ path: '/login' })"
           type="button"
           class="btn btn-lg green-btn"
         >

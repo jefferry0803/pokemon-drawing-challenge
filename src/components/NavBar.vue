@@ -1,7 +1,7 @@
 <template>
   <div class="navbar">
     <div class="navbar-userdisplay" @click="toggleNavBtn">
-      以 {{ username }} 登入中 ▼
+      <span class="mobile-none">以 {{ username }}</span> 登入中 ▼
       <ul class="navButton-container" :class="{ hide: !isNavBtnShow }">
         <li class="navButton">
           <router-link to="/pokedraw">前往繪畫</router-link>
@@ -87,5 +87,18 @@ ul {
 }
 .navButton:hover > a {
   color: #fff;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    top: 10px;
+    right: 10px;
+  }
+  .mobile-none {
+    display: none;
+  }
+  .navButton {
+    width: 100px;
+  }
 }
 </style>

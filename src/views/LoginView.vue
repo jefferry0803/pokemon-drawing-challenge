@@ -71,7 +71,7 @@ function userLogin() {
       isLoading.value = false;
       isAlertShow.value = false;
 
-      router.push("/pokedraw");
+      router.push({ path: "/pokedraw" });
     })
     .catch((e) => {
       isLoading.value = false;
@@ -82,7 +82,7 @@ function userLogin() {
 
 function guestLogin() {
   userStore.guestLogin();
-  router.push("/pokedraw");
+  router.push({ path: "/pokedraw" });
 }
 </script>
 
