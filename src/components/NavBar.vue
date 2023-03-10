@@ -1,7 +1,13 @@
 <template>
   <div class="navbar">
     <div class="navbar-userdisplay" @click="toggleNavBtn">
-      <span class="mobile-none">以 {{ username }}</span> 登入中 ▼
+      <span class="mobile-none" :class="{ 'd-none': !userStore.token }"
+        >以</span
+      >
+      {{ loginStateDisplay }}
+      <span class="mobile-none" :class="{ 'd-none': !userStore.token }"
+        >登入中</span
+      >{{ toggleCollapseBtn }}
       <ul class="navButton-container" :class="{ hide: !isNavBtnShow }">
         <li class="navButton">
           <router-link to="/pokedraw">前往繪畫</router-link>
@@ -13,7 +19,7 @@
           <router-link to="/gallery">公共畫廊</router-link>
         </li>
         <li class="navButton">
-          <a href="#" @click="userStore.logout">登出</a>
+          <a href="#" @click="userStore.logout">{{ logInOutBtn }}</a>
         </li>
       </ul>
     </div>
@@ -21,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useUserStore } from "../stores/user";
 
 const props = defineProps({
@@ -35,6 +41,15 @@ let isNavBtnShow = ref(false);
 function toggleNavBtn() {
   isNavBtnShow.value = !isNavBtnShow.value;
 }
+const toggleCollapseBtn = computed(() => {
+  return isNavBtnShow.value ? "▲" : "▼";
+});
+const loginStateDisplay = computed(() => {
+  return userStore.token ? userStore.username : "未登入";
+});
+const logInOutBtn = computed(() => {
+  return userStore.token ? "登出" : "登入";
+});
 </script>
 
 <style scoped>

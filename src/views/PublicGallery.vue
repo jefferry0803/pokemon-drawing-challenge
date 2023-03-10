@@ -107,6 +107,7 @@ onMounted(() => {
   height: 450px;
   background-size: cover;
   background-position: center;
+  cursor: zoom-in;
 }
 .painting-title {
   position: absolute;

@@ -23,28 +23,35 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-lg btn-success"
-            @click="downloadDraw"
-          >
-            下載保存
-          </button>
-          <button
-            type="button"
-            class="btn btn-lg btn-success"
-            data-bs-dismiss="modal"
-            @click="reset"
-          >
-            再來一局
-          </button>
-          <button
-            @click="toDrawHistory"
-            type="button"
-            class="btn btn-lg btn-success"
-          >
-            前往繪畫記錄
-          </button>
+          <div>
+            <button
+              type="button"
+              class="btn btn-lg btn-success me-2"
+              @click="downloadDraw"
+            >
+              下載保存
+            </button>
+            <button
+              type="button"
+              class="btn btn-lg btn-success"
+              data-bs-dismiss="modal"
+              @click="reset"
+            >
+              再來一局
+            </button>
+          </div>
+          <div>
+            <button
+              type="button"
+              class="btn btn-lg btn-primary me-2"
+              v-if="userStore.token"
+            >
+              <router-link to="/history"> 繪畫記錄 </router-link>
+            </button>
+            <button type="button" class="btn btn-lg btn-primary">
+              <router-link to="/gallery"> 公共畫廊 </router-link>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -54,22 +61,19 @@
 <script setup>
 import { Modal } from "bootstrap";
 import { ref, onMounted, onUnmounted } from "vue";
+import { useUserStore } from "../stores/user";
 
 const emit = defineEmits(["reset", "toDrawHistory"]);
-
 const props = defineProps({
   pokemonImgUrl: String,
   pokemonDrawUrl: String,
   pokemonName: String,
 });
-
 defineExpose({ showModal });
+const userStore = useUserStore();
 
 function reset() {
   emit("reset");
-}
-function toDrawHistory() {
-  emit("toDrawHistory");
 }
 function downloadDraw() {
   let a = document.createElement("a");
@@ -96,6 +100,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+a {
+  color: #fff;
+}
 .modal-content {
   background: var(--sand);
   color: var(--dark-grey-text);
@@ -103,6 +110,8 @@ onUnmounted(() => {
 .modal-header,
 .modal-footer {
   border: none;
+  display: flex;
+  justify-content: space-between;
 }
 .modal-header {
   justify-content: center;
@@ -137,5 +146,20 @@ onUnmounted(() => {
   color: #fff;
   border-radius: 15px;
   padding: 0.5rem 1rem;
+}
+
+@media (max-width: 768px) {
+  .modal-body {
+    flex-direction: column;
+    align-items: center;
+  }
+  .draw-container {
+    width: 100%;
+  }
+}
+@media (max-width: 576px) {
+  .modal-footer {
+    justify-content: end;
+  }
 }
 </style>

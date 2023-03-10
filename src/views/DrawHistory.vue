@@ -165,6 +165,7 @@ onMounted(() => {
   height: 450px;
   background-size: cover;
   background-position: center;
+  cursor: zoom-in;
 }
 .painting:hover .painting-btns {
   display: flex;

@@ -1,7 +1,11 @@
 <template>
   <div class="app-vue">
     <PdcLogo />
-    <RouterView />
+    <RouterView v-slot="slotProps">
+      <Transition name="route" mode="out-in">
+        <Component :is="slotProps.Component"></Component>
+      </Transition>
+    </RouterView>
     <div class="background-reference">
       Image by
       <a
@@ -66,5 +70,23 @@ a {
   position: fixed;
   bottom: 5px;
   right: 5px;
+  font-size: 12px;
+}
+
+.route-enter-active,
+.route-leave-active {
+  transition: all 0.5s ease;
+}
+.route-enter-from {
+  transform: translateY(-100%);
+}
+.route-enter-to {
+  transform: translateY(0%);
+}
+.route-leave-from {
+  transform: scale(1);
+}
+.route-leave-to {
+  transform: scale(0.8);
 }
 </style>

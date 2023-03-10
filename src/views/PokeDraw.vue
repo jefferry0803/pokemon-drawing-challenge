@@ -3,10 +3,18 @@
     <NavBar :username="userStore.username" />
     <div class="topic">
       <h2 class="topic-pokemonName">題目: {{ pokemonName || "???" }}</h2>
-      <p class="topic-description">{{ pokemonDesc || "???" }}</p>
-      <p class="topic-color">主色: {{ pokemonColor || "???" }}</p>
+      <div class="topic-extraInfo" :class="{ myCollapse: isTopicCollapse }">
+        <p class="topic-description">{{ pokemonDesc || "???" }}</p>
+        <p class="topic-color">主色: {{ pokemonColor || "???" }}</p>
+      </div>
+      <div @click="toggleTopic" class="topic-collapseBtn">
+        {{ topicCollapseBtn }}
+      </div>
     </div>
-    <div class="sidebar">
+    <div class="sidebar" :class="{ hide: !isSidebarShow }">
+      <div @click="toggleSidebar" class="sidebar-hideBtn">
+        {{ hideSidebarBtn }}
+      </div>
       <div
         v-for="color in paletteColors"
         :key="color"
@@ -74,7 +82,7 @@
 <script setup>
 import BaseModal from "../components/BaseModal.vue";
 import ResultModal from "../components/ResultModal.vue";
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import axios from "axios";
 import useCanvas from "../composables/canvas.js";
 import usePokeApi from "../composables/pokeApi.js";
@@ -179,6 +187,8 @@ let lastY = 0;
 let currentColor = ref("#000000");
 let undoList = ref([]);
 let redoList = ref([]);
+let isSidebarShow = ref(true);
+let isTopicCollapse = ref(false);
 
 function initCanvas() {
   ctx.value = pokeCanvas.value.getContext("2d");
@@ -270,6 +280,18 @@ function setColor(color) {
     ctx.value.lineWidth = 10;
   }
 }
+function toggleSidebar() {
+  isSidebarShow.value = !isSidebarShow.value;
+}
+function toggleTopic() {
+  isTopicCollapse.value = !isTopicCollapse.value;
+}
+const hideSidebarBtn = computed(() => {
+  return isSidebarShow.value ? "▶" : "◀";
+});
+const topicCollapseBtn = computed(() => {
+  return isTopicCollapse.value ? "▼" : "▲";
+});
 
 window.addEventListener("resize", resizeCanvas);
 onMounted(() => {
@@ -290,6 +312,7 @@ onUnmounted(() => {
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
   border-radius: 49px;
   background: #fff;
+  overflow: hidden;
 }
 .topic {
   background: var(--dark-green);
@@ -300,6 +323,21 @@ onUnmounted(() => {
   position: absolute;
   top: 20px;
   left: 20px;
+}
+.topic-extraInfo {
+  overflow: hidden;
+  max-height: 500px;
+  max-width: 600px;
+  transition: all 0.5s linear;
+}
+.topic-extraInfo.myCollapse {
+  max-height: 0;
+  max-width: 0;
+}
+.topic-collapseBtn {
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
 }
 .sidebar {
   position: absolute;
@@ -312,6 +350,29 @@ onUnmounted(() => {
   background: var(--sand);
   padding: 1rem;
   border-radius: 20px;
+  transition: all 0.5s ease;
+}
+.sidebar.hide {
+  transform: translate(calc(100% + 20px), -50%);
+}
+.sidebar-hideBtn {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-100%, -50%);
+  width: 20px;
+  height: 70px;
+  line-height: 70px;
+  text-align: center;
+  background: var(--sand);
+  color: var(--dark-grey-text);
+  border-radius: 70px 0 0 70px;
+  cursor: pointer;
+}
+.sidebar-hideBtn:active,
+.button:active,
+.topic-collapseBtn:active {
+  filter: brightness(85%);
 }
 .button {
   width: 50px;
@@ -365,6 +426,9 @@ onUnmounted(() => {
 @media (max-width: 576px) {
   .pokedraw-container {
     max-width: 90%;
+  }
+  .topic {
+    padding: 0.75rem;
   }
 }
 </style>
