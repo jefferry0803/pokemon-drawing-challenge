@@ -23,10 +23,10 @@
           </div>
         </div>
         <div class="modal-footer">
-          <div>
+          <div class="btns-container">
             <button
               type="button"
-              class="btn btn-lg btn-success me-2"
+              class="btn btn-lg btn-success"
               @click="downloadDraw"
             >
               下載保存
@@ -40,10 +40,18 @@
               再來一局
             </button>
           </div>
-          <div>
+          <div class="btns-container">
             <button
               type="button"
-              class="btn btn-lg btn-primary me-2"
+              class="btn btn-lg btn-primary"
+              :disabled="isShared"
+              v-if="userStore.token"
+            >
+              <a @click.prevent="shareToGallery" href="#">{{ shareBtnText }}</a>
+            </button>
+            <button
+              type="button"
+              class="btn btn-lg btn-primary"
               v-if="userStore.token"
             >
               <router-link to="/history"> 繪畫記錄 </router-link>
@@ -62,6 +70,8 @@
 import { Modal } from "bootstrap";
 import { ref, onMounted, onUnmounted } from "vue";
 import { useUserStore } from "../stores/user";
+import { doc, updateDoc } from "firebase/firestore";
+import db from "../firebase/index";
 
 const emit = defineEmits(["reset", "toDrawHistory"]);
 const props = defineProps({
@@ -71,6 +81,10 @@ const props = defineProps({
 });
 defineExpose({ showModal });
 const userStore = useUserStore();
+const modal = ref(null);
+const paintingId = ref("");
+let isShared = ref(false);
+let shareBtnText = ref("分享到畫廊");
 
 function reset() {
   emit("reset");
@@ -81,10 +95,19 @@ function downloadDraw() {
   a.download = props.pokemonName || "default.png";
   a.dispatchEvent(new MouseEvent("click"));
 }
+async function shareToGallery() {
+  const paintingRef = doc(db, "draw-history", paintingId.value);
 
-const modal = ref(null);
+  await updateDoc(paintingRef, {
+    isShared: true,
+  });
 
-function showModal() {
+  isShared.value = true;
+  shareBtnText.value = "已分享";
+}
+
+function showModal(id) {
+  paintingId.value = id;
   modal.value.show();
 }
 function hideModal() {
@@ -124,6 +147,7 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: 100%;
 }
 .img-container {
   width: 500px;
@@ -147,14 +171,17 @@ a {
   border-radius: 15px;
   padding: 0.5rem 1rem;
 }
+.btns-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 1rem;
+}
 
 @media (max-width: 768px) {
   .modal-body {
     flex-direction: column;
     align-items: center;
-  }
-  .draw-container {
-    width: 100%;
   }
 }
 @media (max-width: 576px) {

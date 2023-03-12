@@ -87,7 +87,7 @@ import useCanvas from "../composables/canvas.js";
 import usePokeApi from "../composables/pokeApi.js";
 import { useUserStore } from "../stores/user";
 import db from "../firebase/index";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import router from "../router";
 
 const { paletteColors } = useCanvas();
@@ -98,26 +98,24 @@ const userStore = useUserStore();
 function reset() {
   getPokemon();
   secondsLeft.value = 60;
+  undoList.value = [];
+  redoList.value = [];
   allClear();
   setColor("#000000");
   ctx.value.globalCompositeOperation = "source-over";
-  undoList.value = [];
-  redoList.value = [];
 }
 function toDrawHistory() {
   router.push({ path: "/history" });
 }
 function saveResult() {
-  if (userStore.token) {
-    // 是登入的使用者就儲存繪畫紀錄到firebase
-    return addDoc(collection(db, "draw-history"), {
-      paintingUrl: pokemonDrawUrl.value,
-      pokemonName: pokemonName.value,
-      userId: userStore.userId,
-      username: userStore.username,
-      isShared: false,
-    });
-  }
+  return addDoc(collection(db, "draw-history"), {
+    paintingUrl: pokemonDrawUrl.value,
+    pokemonName: pokemonName.value,
+    userId: userStore.userId,
+    username: userStore.username,
+    isShared: false,
+    created: serverTimestamp(),
+  });
 }
 
 // 倒數計時
@@ -143,8 +141,14 @@ async function timesUp() {
   ctx.value.fillStyle = "#fff";
   ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
   pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
-  await saveResult();
-  resultModal.value.showModal();
+
+  if (userStore.token) {
+    const response = await saveResult();
+    const paintingId = response._key.path.segments[1];
+    resultModal.value.showModal(paintingId);
+  } else {
+    resultModal.value.showModal();
+  }
 }
 
 // 寶可夢
@@ -270,6 +274,7 @@ function redo() {
 }
 function allClear() {
   ctx.value.clearRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
+  saveHistory();
 }
 function setColor(color) {
   currentColor.value = color;

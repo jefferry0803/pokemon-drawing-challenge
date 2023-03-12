@@ -55,6 +55,7 @@ import {
   doc,
   deleteDoc,
   updateDoc,
+  orderBy,
 } from "firebase/firestore";
 import db from "../firebase/index";
 
@@ -67,9 +68,11 @@ const imageModal = ref(null);
 
 async function getPaintings() {
   isLoading.value = true;
+  const drawHistoryRef = collection(db, "draw-history");
   const q = query(
-    collection(db, "draw-history"),
-    where("userId", "==", userStore.userId)
+    drawHistoryRef,
+    where("userId", "==", userStore.userId),
+    orderBy("created", "desc")
   );
 
   const querySnapshot = await getDocs(q);

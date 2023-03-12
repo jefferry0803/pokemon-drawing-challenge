@@ -23,7 +23,7 @@
 import { ref, onMounted } from "vue";
 import BaseSpinner from "../components/BaseSpinner.vue";
 import ImageModal from "../components/ImageModal.vue";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import db from "../firebase/index";
 
 let paintingList = ref([]);
@@ -33,9 +33,11 @@ const imageModal = ref(null);
 
 async function getPaintings() {
   isLoading.value = true;
+  const drawHistoryRef = collection(db, "draw-history");
   const q = query(
-    collection(db, "draw-history"),
-    where("isShared", "==", true)
+    drawHistoryRef,
+    where("isShared", "==", true),
+    orderBy("created", "desc")
   );
 
   const querySnapshot = await getDocs(q);
