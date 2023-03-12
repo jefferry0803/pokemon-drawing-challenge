@@ -100,6 +100,9 @@ function reset() {
   secondsLeft.value = 60;
   allClear();
   setColor("#000000");
+  ctx.value.globalCompositeOperation = "source-over";
+  undoList.value = [];
+  redoList.value = [];
 }
 function toDrawHistory() {
   router.push({ path: "/history" });

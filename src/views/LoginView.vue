@@ -75,6 +75,10 @@ function userLogin() {
       isAlertShow.value = true;
     });
 }
+
+if (userStore.token) {
+  router.push({ path: "/history" });
+}
 </script>
 
 <style scoped>
