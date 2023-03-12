@@ -68,7 +68,7 @@
 
 <script setup>
 import { Modal } from "bootstrap";
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useUserStore } from "../stores/user";
 import { doc, updateDoc } from "firebase/firestore";
 import db from "../firebase/index";
@@ -84,7 +84,9 @@ const userStore = useUserStore();
 const modal = ref(null);
 const paintingId = ref("");
 let isShared = ref(false);
-let shareBtnText = ref("分享到畫廊");
+const shareBtnText = computed(() => {
+  return isShared.value ? "已分享" : "分享到畫廊";
+});
 
 function reset() {
   emit("reset");
@@ -103,11 +105,11 @@ async function shareToGallery() {
   });
 
   isShared.value = true;
-  shareBtnText.value = "已分享";
 }
 
 function showModal(id) {
   paintingId.value = id;
+  isShared.value = false;
   modal.value.show();
 }
 function hideModal() {

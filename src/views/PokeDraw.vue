@@ -1,14 +1,19 @@
 <template>
   <div class="pokedraw-container container rel">
     <div class="topic">
-      <h2 class="topic-pokemonName">題目: {{ pokemonName || "???" }}</h2>
-      <div class="topic-extraInfo" :class="{ myCollapse: isTopicCollapse }">
-        <p class="topic-description">{{ pokemonDesc || "???" }}</p>
-        <p class="topic-color">主色: {{ pokemonColor || "???" }}</p>
-      </div>
-      <div @click="toggleTopic" class="topic-collapseBtn">
-        {{ topicCollapseBtn }}
-      </div>
+      <template v-if="isLoading">
+        <BaseSpinner />
+      </template>
+      <template v-else>
+        <h2 class="topic-pokemonName">題目: {{ pokemonName || "???" }}</h2>
+        <div class="topic-extraInfo" :class="{ myCollapse: isTopicCollapse }">
+          <p class="topic-description">{{ pokemonDesc || "???" }}</p>
+          <p class="topic-color">主色: {{ pokemonColor || "???" }}</p>
+        </div>
+        <div @click="toggleTopic" class="topic-collapseBtn">
+          {{ topicCollapseBtn }}
+        </div>
+      </template>
     </div>
     <div class="sidebar" :class="{ hide: !isSidebarShow }">
       <div @click="toggleSidebar" class="sidebar-hideBtn">
@@ -80,6 +85,7 @@
 
 <script setup>
 import BaseModal from "../components/BaseModal.vue";
+import BaseSpinner from "../components/BaseSpinner.vue";
 import ResultModal from "../components/ResultModal.vue";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import axios from "axios";
@@ -158,8 +164,10 @@ let pokemonDesc = ref("");
 let pokemonColor = ref("");
 let pokemonImgUrl = ref("");
 let pokemonDrawUrl = ref("");
+let isLoading = ref(false);
 
 function getPokemon() {
+  isLoading.value = true;
   startModal.value.hideModal();
   pokemonId.value = getRandomNum(905);
   axios
@@ -175,6 +183,7 @@ function getPokemon() {
       pokemonDesc.value = chDesc ? chDesc.replace(/\s+/g, "") : "";
       pokemonImgUrl.value = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId.value}.png`;
 
+      isLoading.value = false;
       startTimer();
     });
 }
@@ -244,7 +253,7 @@ function undo() {
   const img = new Image();
   img.src = undoList.value[undoList.value.length - 1];
   img.onload = () => {
-    allClear();
+    ctx.value.clearRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
     ctx.value.drawImage(
       img,
       0,
@@ -261,7 +270,7 @@ function redo() {
   const img = new Image();
   img.src = redoList.value[redoList.value.length - 1];
   img.onload = () => {
-    allClear();
+    ctx.value.clearRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
     ctx.value.drawImage(
       img,
       0,
