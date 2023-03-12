@@ -1,6 +1,5 @@
 <template>
   <div class="pokedraw-container container rel">
-    <NavBar :username="userStore.username" />
     <div class="topic">
       <h2 class="topic-pokemonName">題目: {{ pokemonName || "???" }}</h2>
       <div class="topic-extraInfo" :class="{ myCollapse: isTopicCollapse }">
@@ -86,7 +85,6 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import axios from "axios";
 import useCanvas from "../composables/canvas.js";
 import usePokeApi from "../composables/pokeApi.js";
-import NavBar from "../components/NavBar.vue";
 import { useUserStore } from "../stores/user";
 import db from "../firebase/index";
 import { collection, addDoc } from "firebase/firestore";
@@ -199,7 +197,7 @@ function initCanvas() {
 }
 function resizeCanvas() {
   pokeCanvas.value.width = canvasContainer.value.getBoundingClientRect().width;
-  pokeCanvas.value.height = window.innerHeight * 0.8;
+  pokeCanvas.value.height = window.innerHeight * 0.7;
 }
 function handleMouseDown(e) {
   isMouseDown.value = true;
@@ -310,7 +308,7 @@ onUnmounted(() => {
 .pokedraw-container {
   border: 3px solid #000;
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
-  border-radius: 49px;
+  border-radius: 0 49px 49px 49px;
   background: #fff;
   overflow: hidden;
 }
@@ -418,15 +416,7 @@ onUnmounted(() => {
   transition: all 1s linear;
 }
 
-@media (min-width: 1800px) {
-  .pokedraw-container {
-    max-width: 1600px;
-  }
-}
 @media (max-width: 576px) {
-  .pokedraw-container {
-    max-width: 90%;
-  }
   .topic {
     padding: 0.75rem;
   }

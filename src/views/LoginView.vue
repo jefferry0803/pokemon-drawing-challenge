@@ -1,5 +1,5 @@
 <template>
-  <div class="container-sm login-container rel">
+  <div class="container login-container rel">
     <div class="loginForm-container">
       <h1>登入</h1>
       <div class="loginForm-inputGroups my-3">
@@ -26,21 +26,15 @@
         </div>
       </div>
       <div class="loginForm-buttons">
-        <router-link to="/signup" class="toSignup">
-          沒有帳號嗎?<br />
-          這裡註冊 →
-        </router-link>
         <BaseButton
           :background-color="'#FDC795'"
           :text="'登入'"
           @click-callback="userLogin"
         />
-        <div class="fs-3">或</div>
-        <BaseButton
-          :background-color="'#DDDEDD'"
-          :text="'以訪客登入'"
-          @click-callback="guestLogin"
-        />
+        <router-link to="/signup" class="toSignup">
+          沒有帳號嗎?<br />
+          這裡註冊 →
+        </router-link>
       </div>
     </div>
     <BaseSpinner v-if="isLoading" />
@@ -80,18 +74,18 @@ function userLogin() {
     });
 }
 
-function guestLogin() {
-  userStore.guestLogin();
-  router.push({ path: "/pokedraw" });
-}
+// function guestLogin() {
+//   userStore.guestLogin();
+//   router.push({ path: "/pokedraw" });
+// }
 </script>
 
 <style scoped>
 .login-container {
   border: 3px solid #000;
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
-  border-radius: 49px;
-  background: #fff;
+  border-radius: 0 49px 49px 49px;
+  background: var(--sand);
   padding: 2rem 2rem 5rem 2rem;
 }
 .loginForm-container {
@@ -101,17 +95,13 @@ function guestLogin() {
 }
 .loginForm-buttons {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  width: max-content;
 }
 .toSignup {
   position: absolute;
+  width: max-content;
   top: 0;
   right: 0;
-  transform: translateX(100%);
+  transform: translateX(calc(100% + 20px));
 }
 .loginForm-label,
 .loginForm-input {
@@ -126,13 +116,8 @@ function guestLogin() {
 }
 
 @media (min-width: 1200px) {
-  .login-container {
-    max-width: 960px;
-  }
-}
-@media (max-width: 576px) {
-  .login-container {
-    max-width: 90%;
+  .container.login-container {
+    width: 960px;
   }
 }
 </style>

@@ -1,119 +1,81 @@
 <template>
-  <div class="navbar">
-    <div class="navbar-userdisplay" @click="toggleNavBtn">
-      <span class="mobile-none" :class="{ 'd-none': !userStore.token }"
-        >以</span
-      >
-      {{ loginStateDisplay }}
-      <span class="mobile-none" :class="{ 'd-none': !userStore.token }"
-        >登入中</span
-      >{{ toggleCollapseBtn }}
-      <ul class="navButton-container" :class="{ hide: !isNavBtnShow }">
-        <li class="navButton">
-          <router-link to="/pokedraw">前往繪畫</router-link>
-        </li>
-        <li class="navButton" v-if="userStore.token">
-          <router-link to="/history">繪畫紀錄</router-link>
-        </li>
-        <li class="navButton">
-          <router-link to="/gallery">公共畫廊</router-link>
-        </li>
-        <li class="navButton">
-          <a href="#" @click="userStore.logout">{{ logInOutBtn }}</a>
-        </li>
-      </ul>
-    </div>
-  </div>
+  <nav class="navBar">
+    <ul class="navButton-container">
+      <li>
+        <router-link @click="userStore.logout" class="navButton" to="/login">{{
+          logInOutBtn
+        }}</router-link>
+      </li>
+      <li>
+        <router-link class="navButton" to="/signup">註冊</router-link>
+      </li>
+      <li>
+        <router-link class="navButton" to="/pokedraw">前往繪畫</router-link>
+      </li>
+      <li v-if="userStore.token">
+        <router-link class="navButton" to="/history">繪畫紀錄</router-link>
+      </li>
+      <li>
+        <router-link class="navButton" to="/gallery">公共畫廊</router-link>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import { useUserStore } from "../stores/user";
-
-const props = defineProps({
-  username: String,
-});
 
 const userStore = useUserStore();
 
-let isNavBtnShow = ref(false);
-
-function toggleNavBtn() {
-  isNavBtnShow.value = !isNavBtnShow.value;
-}
-const toggleCollapseBtn = computed(() => {
-  return isNavBtnShow.value ? "▲" : "▼";
-});
-const loginStateDisplay = computed(() => {
-  return userStore.token ? userStore.username : "未登入";
-});
 const logInOutBtn = computed(() => {
   return userStore.token ? "登出" : "登入";
 });
 </script>
 
 <style scoped>
-a,
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+a {
+  color: #000;
+}
 a:hover {
   color: #000;
 }
-ul {
-  list-style: none;
-}
-.navbar {
-  position: fixed;
-  top: 50px;
-  right: 50px;
-  font-size: 1.25rem;
-  z-index: 2;
-}
-.navbar-userdisplay {
-  position: relative;
-  border: 3px solid #000;
-  border-radius: 15px;
-  background: var(--pokemon-yellow);
-  padding: 0.5rem;
-  cursor: pointer;
-  box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
+.navBar {
+  align-self: flex-start;
+  width: 100%;
 }
 .navButton-container {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  transition: all 0.25s ease;
-  transform: scaleY(1);
-  transform-origin: top;
-}
-.navButton-container.hide {
-  transform: scaleY(0);
+  display: flex;
+  flex-wrap: wrap-reverse;
+  max-width: 90%;
 }
 .navButton {
-  width: 150px;
-  text-align: center;
-  border: 2px solid #000;
-  background: #fff;
-}
-.navButton,
-.navButton > a {
-  transition: 0.25s all ease;
+  display: inline-block;
+  background: #cdbc85;
+  padding: 0.5rem 1rem;
+  border: 3px solid #000;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  margin-bottom: -3px;
 }
 .navButton:hover {
-  box-shadow: inset 150px 0 0 0 var(--pokemon-blue);
+  background: var(--sand);
 }
-.navButton:hover > a {
-  color: #fff;
+.router-link-active {
+  position: relative;
+  border-bottom: none;
+  z-index: 1;
+  background: var(--sand);
 }
 
-@media (max-width: 768px) {
-  .navbar {
-    top: 10px;
-    right: 10px;
-  }
-  .mobile-none {
-    display: none;
-  }
+@media (max-width: 576px) {
   .navButton {
-    width: 100px;
+    padding: 0.25rem 0.5rem;
   }
 }
 </style>

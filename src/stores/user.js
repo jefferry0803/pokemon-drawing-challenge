@@ -49,9 +49,6 @@ export const useUserStore = defineStore("user", {
         this.setUser(username, res.data.localId, res.data.idToken);
       });
     },
-    guestLogin() {
-      this.setUser("訪客", null, null);
-    },
     autoLogin() {
       const username = localStorage.getItem("username");
       const userId = localStorage.getItem("userId");

@@ -1,24 +1,25 @@
 <template>
   <div class="app-vue">
-    <PdcLogo />
-    <RouterView v-slot="slotProps">
-      <Transition name="route" mode="out-in">
-        <Component :is="slotProps.Component"></Component>
-      </Transition>
-    </RouterView>
-    <div class="background-reference">
-      Image by
-      <a
-        href="https://www.freepik.com/free-vector/organic-flat-jungle-background_13839952.htm#query=forest%20background&position=1&from_view=search&track=sph"
-        >Freepik</a
-      >
-    </div>
+    <main class="main">
+      <LoginState :username="userStore.username" />
+      <PdcLogo />
+      <NavBar />
+      <RouterView />
+      <div class="background-reference">
+        Image by
+        <a
+          href="https://www.freepik.com/free-vector/organic-flat-jungle-background_13839952.htm#query=forest%20background&position=1&from_view=search&track=sph"
+          >Freepik</a
+        >
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { RouterView } from "vue-router";
 import PdcLogo from "./components/PdcLogo.vue";
+import LoginState from "./components/LoginState.vue";
+import NavBar from "./components/NavBar.vue";
 import { useUserStore } from "./stores/user";
 
 const userStore = useUserStore();
@@ -52,6 +53,44 @@ a {
 .rel {
   position: relative;
 }
+.container {
+  max-width: unset;
+}
+@media (max-width: 576px) {
+  .main {
+    width: 90%;
+  }
+}
+@media (min-width: 576px) {
+  .container {
+    width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .container {
+    width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .container {
+    width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .container {
+    width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .container {
+    width: 1320px;
+  }
+}
+@media (min-width: 1800px) {
+  .container {
+    width: 1600px;
+  }
+}
 </style>
 
 <style scoped>
@@ -62,8 +101,12 @@ a {
   background-repeat: no-repeat;
   background-position: center;
   display: flex;
-  flex-direction: column;
   justify-content: center;
+  align-items: center;
+}
+.main {
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 .background-reference {
@@ -71,22 +114,5 @@ a {
   bottom: 5px;
   right: 5px;
   font-size: 12px;
-}
-
-.route-enter-active,
-.route-leave-active {
-  transition: all 0.5s ease;
-}
-.route-enter-from {
-  transform: translateY(-100%);
-}
-.route-enter-to {
-  transform: translateY(0%);
-}
-.route-leave-from {
-  transform: scale(1);
-}
-.route-leave-to {
-  transform: scale(0.8);
 }
 </style>

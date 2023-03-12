@@ -1,5 +1,5 @@
 <template>
-  <div class="container-sm signup-container rel">
+  <div class="container signup-container rel">
     <div class="toLogin-container">
       <router-link class="toLogin" to="/login">← 返回登入頁</router-link>
     </div>
@@ -116,8 +116,8 @@ function signup() {
 .signup-container {
   border: 3px solid #000;
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
-  border-radius: 49px;
-  background: #fff;
+  border-radius: 0 49px 49px 49px;
+  background: var(--sand);
   padding: 2rem 2rem 5rem 2rem;
 }
 .signupForm-container {
@@ -154,13 +154,8 @@ function signup() {
 }
 
 @media (min-width: 1200px) {
-  .signup-container {
-    max-width: 960px;
-  }
-}
-@media (max-width: 576px) {
-  .signup-container {
-    max-width: 90%;
+  .container.signup-container {
+    width: 960px;
   }
 }
 </style>

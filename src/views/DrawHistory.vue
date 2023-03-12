@@ -1,7 +1,6 @@
 <template>
   <div class="drawHistory-container container">
     <BaseSpinner class="spinner" v-if="isLoading" />
-    <NavBar :username="userStore.username" />
     <h1 class="drawHistory-title">繪畫紀錄</h1>
     <div class="paintings-container">
       <template v-for="painting in paintingList" :key="painting.id">
@@ -45,7 +44,6 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import NavBar from "../components/NavBar.vue";
 import ImageModal from "../components/ImageModal.vue";
 import BaseSpinner from "../components/BaseSpinner.vue";
 import { useUserStore } from "../stores/user";
@@ -139,10 +137,10 @@ onMounted(() => {
 .drawHistory-container {
   border: 3px solid #000;
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
-  border-radius: 49px;
+  border-radius: 0 49px 49px 49px;
   background: var(--sand);
-  height: 80vh;
-  padding: 2rem 5rem;
+  height: 75vh;
+  padding: 1rem;
   position: relative;
 }
 .drawHistory-title {
@@ -155,7 +153,7 @@ onMounted(() => {
   overflow: auto;
   padding-right: 1.5rem;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 2rem;
 }
 .painting {
@@ -232,22 +230,17 @@ onMounted(() => {
   border-radius: 4px;
   background: var(--dark-green);
 }
-
-@media (min-width: 1800px) {
-  .drawHistory-container {
-    max-width: 1600px;
+@media (min-width: 1200px) {
+  .paintings-container {
+    grid-template-columns: 1fr 1fr;
   }
 }
-@media (max-width: 1200px) {
-  .paintings-container {
-    grid-template-columns: 1fr;
+@media (min-width: 768px) {
+  .drawHistory-container {
+    padding: 2rem 5rem;
   }
 }
 @media (max-width: 768px) {
-  .drawHistory-container {
-    max-width: 90%;
-    padding: 1rem;
-  }
   .paintings-container {
     padding-right: 0.5rem;
   }

@@ -1,7 +1,6 @@
 <template>
   <div class="gallery-container container">
     <BaseSpinner class="spinner" v-if="isLoading" />
-    <NavBar :username="userStore.username" />
     <h1 class="gallery-title">公共畫廊</h1>
     <div class="paintings-container">
       <template v-for="painting in paintingList" :key="painting.id">
@@ -22,14 +21,10 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import NavBar from "../components/NavBar.vue";
 import BaseSpinner from "../components/BaseSpinner.vue";
 import ImageModal from "../components/ImageModal.vue";
-import { useUserStore } from "../stores/user";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import db from "../firebase/index";
-
-const userStore = useUserStore();
 
 let paintingList = ref([]);
 let isLoading = ref(false);
@@ -75,10 +70,10 @@ onMounted(() => {
 .gallery-container {
   border: 3px solid #000;
   box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
-  border-radius: 49px;
+  border-radius: 0 49px 49px 49px;
   background: var(--sand);
-  height: 80vh;
-  padding: 2rem 5rem;
+  height: 75vh;
+  padding: 1rem;
   position: relative;
 }
 .spinner {
@@ -97,7 +92,7 @@ onMounted(() => {
   overflow: auto;
   padding-right: 1.5rem;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 2rem;
 }
 .painting {
@@ -133,22 +128,17 @@ onMounted(() => {
   border-radius: 4px;
   background: var(--dark-green);
 }
-
-@media (min-width: 1800px) {
-  .gallery-container {
-    max-width: 1600px;
+@media (min-width: 1200px) {
+  .paintings-container {
+    grid-template-columns: 1fr 1fr;
   }
 }
-@media (max-width: 1200px) {
-  .paintings-container {
-    grid-template-columns: 1fr;
+@media (min-width: 768px) {
+  .gallery-container {
+    padding: 2rem 5rem;
   }
 }
 @media (max-width: 768px) {
-  .gallery-container {
-    max-width: 90%;
-    padding: 1rem;
-  }
   .painting {
     height: 400px;
   }
