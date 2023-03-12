@@ -13,6 +13,7 @@
             class="loginForm-input"
             id="username"
             type="email"
+            @keydown.enter="userLogin"
           />
         </div>
         <div class="loginForm-inputGroup my-3">
@@ -22,6 +23,7 @@
             class="loginForm-input"
             id="password"
             type="password"
+            @keydown.enter="userLogin"
           />
         </div>
       </div>
@@ -73,11 +75,6 @@ function userLogin() {
       isAlertShow.value = true;
     });
 }
-
-// function guestLogin() {
-//   userStore.guestLogin();
-//   router.push({ path: "/pokedraw" });
-// }
 </script>
 
 <style scoped>

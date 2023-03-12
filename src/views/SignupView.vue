@@ -20,6 +20,7 @@
             class="signupForm-input"
             id="username"
             type="email"
+            @keydown.enter="signup"
           />
         </div>
         <div class="signupForm-inputGroup my-3">
@@ -29,6 +30,7 @@
             class="signupForm-input"
             id="password"
             type="password"
+            @keydown.enter="signup"
           />
         </div>
       </div>
