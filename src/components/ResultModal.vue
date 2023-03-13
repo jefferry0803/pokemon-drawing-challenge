@@ -13,14 +13,23 @@
           <h1 class="modal-title" id="resultModalLabel">遊戲結束!</h1>
         </div>
         <div class="modal-body">
-          <div class="img-container">
-            <h2 class="pic-title">他長這樣</h2>
-            <img class="img" :src="pokemonImgUrl" alt="" />
+          <div class="result-comparison">
+            <div class="img-container">
+              <h2 class="pic-title">他長這樣</h2>
+              <img class="img" :src="pokemonImgUrl" alt="" />
+            </div>
+            <div class="draw-container">
+              <h2 class="pic-title">你畫這樣</h2>
+              <img class="img" :src="pokemonDrawUrl" alt="" />
+            </div>
           </div>
-          <div class="draw-container">
-            <h2 class="pic-title">你畫這樣</h2>
-            <img class="img" :src="pokemonDrawUrl" alt="" />
-          </div>
+          <p v-if="!userStore.token" class="text-center mt-3 mb-0">
+            您目前沒有登入，畫作將不會保存，要不要考慮
+            <router-link to="/login" class="text-primary">登入</router-link>
+            或是
+            <router-link to="/signup" class="text-primary">註冊</router-link>
+            呢?
+          </p>
         </div>
         <div class="modal-footer">
           <div class="btns-container">
@@ -157,7 +166,7 @@ a {
 .draw-container {
   width: 800px;
 }
-.modal-body {
+.result-comparison {
   display: flex;
 }
 .modal-dialog {
@@ -181,7 +190,7 @@ a {
 }
 
 @media (max-width: 768px) {
-  .modal-body {
+  .result-comparison {
     flex-direction: column;
     align-items: center;
   }

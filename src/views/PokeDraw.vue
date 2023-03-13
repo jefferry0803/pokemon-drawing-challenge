@@ -1,7 +1,7 @@
 <template>
   <div class="pokedraw-container container rel">
     <div class="topic">
-      <template v-if="isLoading">
+      <template v-if="isPokemonLoading">
         <BaseSpinner />
       </template>
       <template v-else>
@@ -80,6 +80,7 @@
       @reset="reset"
       @to-draw-history="toDrawHistory"
     />
+    <LoadingDots v-if="isSavingResult" :title="'結果儲存中'" />
   </div>
 </template>
 
@@ -87,6 +88,7 @@
 import BaseModal from "../components/BaseModal.vue";
 import BaseSpinner from "../components/BaseSpinner.vue";
 import ResultModal from "../components/ResultModal.vue";
+import LoadingDots from "../components/LoadingDots.vue";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import axios from "axios";
 import useCanvas from "../composables/canvas.js";
@@ -100,7 +102,41 @@ const { paletteColors } = useCanvas();
 const { getLanguageContent, getColorChineseName } = usePokeApi();
 const userStore = useUserStore();
 
-// 遊戲結束相關
+// 遊戲機制相關
+let secondsLeft = ref(60);
+let timer = ref(null);
+const startModal = ref(null);
+const resultModal = ref(null);
+let isSavingResult = ref(false);
+
+function startTimer() {
+  timer.value = setInterval(() => {
+    if (secondsLeft.value <= 0) {
+      clearInterval(timer.value);
+      timesUp();
+      return;
+    }
+    secondsLeft.value--;
+  }, 1000);
+}
+
+async function timesUp() {
+  handleMousUp();
+  ctx.value.globalCompositeOperation = "destination-over";
+  ctx.value.fillStyle = "#fff";
+  ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
+  pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
+
+  if (userStore.token) {
+    isSavingResult.value = true;
+    const response = await saveResult();
+    isSavingResult.value = false;
+    const paintingId = response._key.path.segments[1];
+    resultModal.value.showModal(paintingId);
+  } else {
+    resultModal.value.showModal();
+  }
+}
 function reset() {
   getPokemon();
   secondsLeft.value = 60;
@@ -124,39 +160,6 @@ function saveResult() {
   });
 }
 
-// 倒數計時
-let secondsLeft = ref(60);
-let timer = ref(null);
-const startModal = ref(null);
-const resultModal = ref(null);
-
-function startTimer() {
-  timer.value = setInterval(() => {
-    if (secondsLeft.value <= 0) {
-      clearInterval(timer.value);
-      timesUp();
-      return;
-    }
-    secondsLeft.value--;
-  }, 1000);
-}
-
-async function timesUp() {
-  handleMousUp();
-  ctx.value.globalCompositeOperation = "destination-over";
-  ctx.value.fillStyle = "#fff";
-  ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
-  pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
-
-  if (userStore.token) {
-    const response = await saveResult();
-    const paintingId = response._key.path.segments[1];
-    resultModal.value.showModal(paintingId);
-  } else {
-    resultModal.value.showModal();
-  }
-}
-
 // 寶可夢
 let pokemonId = ref("");
 let pokemonName = ref("");
@@ -164,10 +167,10 @@ let pokemonDesc = ref("");
 let pokemonColor = ref("");
 let pokemonImgUrl = ref("");
 let pokemonDrawUrl = ref("");
-let isLoading = ref(false);
+let isPokemonLoading = ref(false);
 
 function getPokemon() {
-  isLoading.value = true;
+  isPokemonLoading.value = true;
   startModal.value.hideModal();
   pokemonId.value = getRandomNum(905);
   axios
@@ -183,7 +186,7 @@ function getPokemon() {
       pokemonDesc.value = chDesc ? chDesc.replace(/\s+/g, "") : "";
       pokemonImgUrl.value = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId.value}.png`;
 
-      isLoading.value = false;
+      isPokemonLoading.value = false;
       startTimer();
     });
 }
