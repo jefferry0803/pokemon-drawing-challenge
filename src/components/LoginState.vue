@@ -9,17 +9,17 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useUserStore } from "../stores/user";
+import { computed } from 'vue';
+import { useUserStore } from '../stores/user';
 
-const props = defineProps({
+defineProps({
   username: String,
 });
 
 const userStore = useUserStore();
 
 const loginStateDisplay = computed(() => {
-  return userStore.token ? userStore.username : "未登入";
+  return userStore.token ? userStore.username : '未登入';
 });
 </script>
 

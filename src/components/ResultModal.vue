@@ -1,7 +1,7 @@
 <template>
   <div
-    class="modal fade"
     id="resultModal"
+    class="modal fade"
     tabindex="-1"
     aria-labelledby="resultModalLabel"
     aria-hidden="true"
@@ -10,7 +10,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title" id="resultModalLabel">遊戲結束!</h1>
+          <h1 id="resultModalLabel" class="modal-title">遊戲結束!</h1>
         </div>
         <div class="modal-body">
           <div class="result-comparison">
@@ -25,9 +25,9 @@
           </div>
           <p v-if="!userStore.token" class="text-center mt-3 mb-0">
             您目前沒有登入，畫作將不會保存，要不要考慮
-            <router-link to="/login" class="text-primary">登入</router-link>
+            <router-link to="/login" class="text-primary"> 登入 </router-link>
             或是
-            <router-link to="/signup" class="text-primary">註冊</router-link>
+            <router-link to="/signup" class="text-primary"> 註冊 </router-link>
             呢?
           </p>
         </div>
@@ -51,17 +51,17 @@
           </div>
           <div class="btns-container">
             <button
+              v-if="userStore.token"
               type="button"
               class="btn btn-lg btn-primary"
               :disabled="isShared"
-              v-if="userStore.token"
             >
-              <a @click.prevent="shareToGallery" href="#">{{ shareBtnText }}</a>
+              <a href="#" @click.prevent="shareToGallery">{{ shareBtnText }}</a>
             </button>
             <button
+              v-if="userStore.token"
               type="button"
               class="btn btn-lg btn-primary"
-              v-if="userStore.token"
             >
               <router-link to="/history"> 繪畫記錄 </router-link>
             </button>
@@ -76,13 +76,13 @@
 </template>
 
 <script setup>
-import { Modal } from "bootstrap";
-import { ref, onMounted, onUnmounted, computed } from "vue";
-import { useUserStore } from "../stores/user";
-import { doc, updateDoc } from "firebase/firestore";
-import db from "../firebase/index";
+import { Modal } from 'bootstrap';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useUserStore } from '../stores/user';
+import { doc, updateDoc } from 'firebase/firestore';
+import db from '../firebase/index';
 
-const emit = defineEmits(["reset", "toDrawHistory"]);
+const emit = defineEmits(['reset', 'toDrawHistory']);
 const props = defineProps({
   pokemonImgUrl: String,
   pokemonDrawUrl: String,
@@ -91,23 +91,23 @@ const props = defineProps({
 defineExpose({ showModal });
 const userStore = useUserStore();
 const modal = ref(null);
-const paintingId = ref("");
+const paintingId = ref('');
 let isShared = ref(false);
 const shareBtnText = computed(() => {
-  return isShared.value ? "已分享" : "分享到畫廊";
+  return isShared.value ? '已分享' : '分享到畫廊';
 });
 
 function reset() {
-  emit("reset");
+  emit('reset');
 }
 function downloadDraw() {
-  let a = document.createElement("a");
+  let a = document.createElement('a');
   a.href = props.pokemonDrawUrl;
-  a.download = props.pokemonName || "default.png";
-  a.dispatchEvent(new MouseEvent("click"));
+  a.download = props.pokemonName || 'default.png';
+  a.dispatchEvent(new MouseEvent('click'));
 }
 async function shareToGallery() {
-  const paintingRef = doc(db, "draw-history", paintingId.value);
+  const paintingRef = doc(db, 'draw-history', paintingId.value);
 
   await updateDoc(paintingRef, {
     isShared: true,
@@ -126,7 +126,7 @@ function hideModal() {
 }
 
 onMounted(() => {
-  modal.value = new Modal("#resultModal");
+  modal.value = new Modal('#resultModal');
 });
 onUnmounted(() => {
   hideModal();

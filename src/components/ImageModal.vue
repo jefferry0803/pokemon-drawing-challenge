@@ -1,7 +1,7 @@
 <template>
   <div
-    class="modal fade"
     id="imageModal"
+    class="modal fade"
     tabindex="-1"
     aria-labelledby="imageModalLabel"
     aria-hidden="true"
@@ -19,8 +19,8 @@
 </template>
 
 <script setup>
-import { Modal } from "bootstrap";
-import { ref, onMounted, onUnmounted } from "vue";
+import { Modal } from 'bootstrap';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
   imageUrl: String,
@@ -38,7 +38,7 @@ function hideModal() {
 }
 
 onMounted(() => {
-  modal.value = new Modal("#imageModal");
+  modal.value = new Modal('#imageModal');
 });
 onUnmounted(() => {
   hideModal();

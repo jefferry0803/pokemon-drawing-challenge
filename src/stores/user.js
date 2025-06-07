@@ -1,13 +1,13 @@
-import { defineStore } from "pinia";
-import router from "../router";
-import axios from "axios";
+import { defineStore } from 'pinia';
+import router from '../router';
+import axios from 'axios';
 
-export const useUserStore = defineStore("user", {
+export const useUserStore = defineStore('user', {
   state: () => ({
-    username: "訪客",
-    userId: "",
-    token: "",
-    logoutTimer: "",
+    username: '訪客',
+    userId: '',
+    token: '',
+    logoutTimer: '',
   }),
   actions: {
     signup(email, password) {
@@ -17,7 +17,7 @@ export const useUserStore = defineStore("user", {
         returnSecureToken: true,
       };
       const url =
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC-mWBQB9BMbFZsR5DG0fxiNnLIq2e5fYM";
+        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC-mWBQB9BMbFZsR5DG0fxiNnLIq2e5fYM';
 
       return axios.post(url, data);
     },
@@ -28,19 +28,19 @@ export const useUserStore = defineStore("user", {
         returnSecureToken: true,
       };
       const url =
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyC-mWBQB9BMbFZsR5DG0fxiNnLIq2e5fYM";
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyC-mWBQB9BMbFZsR5DG0fxiNnLIq2e5fYM';
 
       return axios.post(url, data).then((res) => {
         const email = res.data.email;
-        const username = email.substring(0, email.search("@"));
+        const username = email.substring(0, email.search('@'));
 
         const expiresIn = +res.data.expiresIn * 1000;
         const expirationDate = new Date().getTime() + expiresIn;
 
-        localStorage.setItem("username", username);
-        localStorage.setItem("userId", res.data.localId);
-        localStorage.setItem("token", res.data.idToken);
-        localStorage.setItem("tokenExpiration", expirationDate);
+        localStorage.setItem('username', username);
+        localStorage.setItem('userId', res.data.localId);
+        localStorage.setItem('token', res.data.idToken);
+        localStorage.setItem('tokenExpiration', expirationDate);
 
         this.logoutTimer = setTimeout(() => {
           this.logout();
@@ -50,10 +50,10 @@ export const useUserStore = defineStore("user", {
       });
     },
     autoLogin() {
-      const username = localStorage.getItem("username");
-      const userId = localStorage.getItem("userId");
-      const token = localStorage.getItem("token");
-      const tokenExpiration = localStorage.getItem("tokenExpiration");
+      const username = localStorage.getItem('username');
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      const tokenExpiration = localStorage.getItem('tokenExpiration');
 
       const expiresIn = +tokenExpiration - new Date().getTime();
 
@@ -75,16 +75,16 @@ export const useUserStore = defineStore("user", {
       this.token = token;
     },
     logout() {
-      localStorage.removeItem("username");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenExpiration");
+      localStorage.removeItem('username');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('token');
+      localStorage.removeItem('tokenExpiration');
 
       clearTimeout(this.logoutTimer);
 
       this.setUser(null, null, null);
 
-      router.replace("/login");
+      router.replace('/login');
     },
   },
 });

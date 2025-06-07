@@ -1,6 +1,6 @@
 <template>
   <div class="gallery-container container">
-    <BaseSpinner class="spinner" v-if="isLoading" />
+    <BaseSpinner v-if="isLoading" class="spinner" />
     <h1 class="gallery-title">公共畫廊</h1>
     <div class="paintings-container">
       <template v-for="painting in paintingList" :key="painting.id">
@@ -20,24 +20,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import BaseSpinner from "../components/BaseSpinner.vue";
-import ImageModal from "../components/ImageModal.vue";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import db from "../firebase/index";
+import { ref, onMounted } from 'vue';
+import BaseSpinner from '../components/BaseSpinner.vue';
+import ImageModal from '../components/ImageModal.vue';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import db from '../firebase/index';
 
 let paintingList = ref([]);
 let isLoading = ref(false);
-let focusImageUrl = ref("");
+let focusImageUrl = ref('');
 const imageModal = ref(null);
 
 async function getPaintings() {
   isLoading.value = true;
-  const drawHistoryRef = collection(db, "draw-history");
+  const drawHistoryRef = collection(db, 'draw-history');
   const q = query(
     drawHistoryRef,
-    where("isShared", "==", true),
-    orderBy("created", "desc")
+    where('isShared', '==', true),
+    orderBy('created', 'desc'),
   );
 
   const querySnapshot = await getDocs(q);

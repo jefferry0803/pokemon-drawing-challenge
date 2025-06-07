@@ -9,9 +9,9 @@
         <div class="loginForm-inputGroup my-3">
           <label class="loginForm-label" for="username">信箱</label
           ><input
+            id="username"
             v-model="email"
             class="loginForm-input"
-            id="username"
             type="email"
             @keydown.enter="userLogin"
           />
@@ -19,9 +19,9 @@
         <div class="loginForm-inputGroup my-3">
           <label class="loginForm-label" for="password">密碼</label
           ><input
+            id="password"
             v-model="password"
             class="loginForm-input"
-            id="password"
             type="password"
             @keydown.enter="userLogin"
           />
@@ -44,19 +44,19 @@
 </template>
 
 <script setup>
-import BaseButton from "../components/BaseButton.vue";
-import BaseSpinner from "../components/BaseSpinner.vue";
-import { useUserStore } from "../stores/user";
-import { useRouter } from "vue-router";
-import { ref } from "vue";
+import BaseButton from '../components/BaseButton.vue';
+import BaseSpinner from '../components/BaseSpinner.vue';
+import { useUserStore } from '../stores/user';
+import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 
 const userStore = useUserStore();
 const router = useRouter();
 
-let email = ref("");
-let password = ref("");
+let email = ref('');
+let password = ref('');
 let isAlertShow = ref(false);
-let alertMessage = ref("");
+let alertMessage = ref('');
 let isLoading = ref(false);
 
 function userLogin() {
@@ -67,17 +67,17 @@ function userLogin() {
       isLoading.value = false;
       isAlertShow.value = false;
 
-      router.push({ path: "/pokedraw" });
+      router.push({ path: '/pokedraw' });
     })
-    .catch((e) => {
+    .catch(() => {
       isLoading.value = false;
-      alertMessage.value = "信箱或密碼錯誤";
+      alertMessage.value = '信箱或密碼錯誤';
       isAlertShow.value = true;
     });
 }
 
 if (userStore.token) {
-  router.push({ path: "/history" });
+  router.push({ path: '/history' });
 }
 </script>
 

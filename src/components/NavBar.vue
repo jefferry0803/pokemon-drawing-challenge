@@ -2,34 +2,34 @@
   <nav class="navBar">
     <ul class="navButton-container">
       <li>
-        <router-link @click="userStore.logout" class="navButton" to="/login">{{
-          logInOutBtn
-        }}</router-link>
+        <router-link class="navButton" to="/login" @click="userStore.logout">
+          {{ logInOutBtn }}
+        </router-link>
       </li>
       <li>
-        <router-link class="navButton" to="/signup">註冊</router-link>
+        <router-link class="navButton" to="/signup"> 註冊 </router-link>
       </li>
       <li>
-        <router-link class="navButton" to="/pokedraw">前往繪畫</router-link>
+        <router-link class="navButton" to="/pokedraw"> 前往繪畫 </router-link>
       </li>
       <li v-if="userStore.token">
-        <router-link class="navButton" to="/history">繪畫紀錄</router-link>
+        <router-link class="navButton" to="/history"> 繪畫紀錄 </router-link>
       </li>
       <li>
-        <router-link class="navButton" to="/gallery">公共畫廊</router-link>
+        <router-link class="navButton" to="/gallery"> 公共畫廊 </router-link>
       </li>
     </ul>
   </nav>
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useUserStore } from "../stores/user";
+import { computed } from 'vue';
+import { useUserStore } from '../stores/user';
 
 const userStore = useUserStore();
 
 const logInOutBtn = computed(() => {
-  return userStore.token ? "登出" : "登入";
+  return userStore.token ? '登出' : '登入';
 });
 </script>
 

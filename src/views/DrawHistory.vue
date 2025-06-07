@@ -1,6 +1,6 @@
 <template>
   <div class="drawHistory-container container">
-    <BaseSpinner class="spinner" v-if="isLoading" />
+    <BaseSpinner v-if="isLoading" class="spinner" />
     <h1 class="drawHistory-title">繪畫紀錄</h1>
     <div class="paintings-container">
       <template v-for="painting in paintingList" :key="painting.id">
@@ -43,10 +43,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import ImageModal from "../components/ImageModal.vue";
-import BaseSpinner from "../components/BaseSpinner.vue";
-import { useUserStore } from "../stores/user";
+import { ref, onMounted } from 'vue';
+import ImageModal from '../components/ImageModal.vue';
+import BaseSpinner from '../components/BaseSpinner.vue';
+import { useUserStore } from '../stores/user';
 import {
   collection,
   query,
@@ -56,23 +56,23 @@ import {
   deleteDoc,
   updateDoc,
   orderBy,
-} from "firebase/firestore";
-import db from "../firebase/index";
+} from 'firebase/firestore';
+import db from '../firebase/index';
 
 const userStore = useUserStore();
 
 let paintingList = ref([]);
 let isLoading = ref(false);
-let focusImageUrl = ref("");
+let focusImageUrl = ref('');
 const imageModal = ref(null);
 
 async function getPaintings() {
   isLoading.value = true;
-  const drawHistoryRef = collection(db, "draw-history");
+  const drawHistoryRef = collection(db, 'draw-history');
   const q = query(
     drawHistoryRef,
-    where("userId", "==", userStore.userId),
-    orderBy("created", "desc")
+    where('userId', '==', userStore.userId),
+    orderBy('created', 'desc'),
   );
 
   const querySnapshot = await getDocs(q);
@@ -95,12 +95,12 @@ async function getPaintings() {
 }
 
 async function deletePainting(id) {
-  await deleteDoc(doc(db, "draw-history", id));
+  await deleteDoc(doc(db, 'draw-history', id));
   getPaintings();
 }
 
 async function toggleIsShared(paintingId, isShared) {
-  const paintingRef = doc(db, "draw-history", paintingId);
+  const paintingRef = doc(db, 'draw-history', paintingId);
 
   await updateDoc(paintingRef, {
     isShared: !isShared,
@@ -110,10 +110,10 @@ async function toggleIsShared(paintingId, isShared) {
 }
 
 function downloadPainting(url, fileName) {
-  let a = document.createElement("a");
+  let a = document.createElement('a');
   a.href = url;
-  a.download = fileName || "default.png";
-  a.dispatchEvent(new MouseEvent("click"));
+  a.download = fileName || 'default.png';
+  a.dispatchEvent(new MouseEvent('click'));
 }
 
 function setFocusImage(url) {
@@ -122,7 +122,7 @@ function setFocusImage(url) {
 }
 
 function getShareBtnText(isShared) {
-  return isShared ? "已分享" : "分享到畫廊";
+  return isShared ? '已分享' : '分享到畫廊';
 }
 
 onMounted(() => {
@@ -219,7 +219,7 @@ onMounted(() => {
   display: none;
 }
 .shareBtn.shared:hover::before {
-  content: "取消分享";
+  content: '取消分享';
 }
 ::-webkit-scrollbar {
   width: 10px;

@@ -5,28 +5,28 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed } from 'vue';
 
 const props = defineProps({
   backgroundColor: String,
   text: String,
   textColor: {
     type: String,
-    default: "#000",
+    default: '#000',
   },
 });
 
-const emit = defineEmits(["clickCallback"]);
+const emit = defineEmits(['clickCallback']);
 
 const styleObject = computed(() => {
   return {
-    "--background-color": props.backgroundColor,
-    "--text-color": props.textColor,
+    '--background-color': props.backgroundColor,
+    '--text-color': props.textColor,
   };
 });
 
 function handleClick() {
-  emit("clickCallback");
+  emit('clickCallback');
 }
 </script>
 
@@ -39,6 +39,7 @@ function handleClick() {
   background-color: var(--background-color);
   color: var(--text-color);
 }
+
 .base-button:hover {
   filter: brightness(85%);
 }
