@@ -94,9 +94,9 @@ function signup() {
           successModal.value.showModal();
           isSignupErrMsgShow.value = false;
         })
-        .catch((e) => {
+        .catch((err) => {
           isLoading.value = false;
-          if (e.response.data.error.message === 'EMAIL_EXISTS') {
+          if (err.code === 'auth/email-already-in-use') {
             alertMessage.value = '信箱已被使用';
           } else {
             alertMessage.value = '註冊發生錯誤';

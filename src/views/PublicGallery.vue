@@ -23,24 +23,36 @@
 import { ref, onMounted } from 'vue';
 import BaseSpinner from '../components/BaseSpinner.vue';
 import ImageModal from '../components/ImageModal.vue';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import db from '../firebase/index';
+import { where, orderBy } from 'firebase/firestore';
+import { apiGetPaintingList } from '@/api/painting';
+
+// TODO: 定義 Painting 類型
+// type Painting {
+//   id: string;
+//   paintingUrl: string;
+//   pokemonName: string;
+//   userId: string;
+//   username: string;
+//   isShared?: boolean;
+//   created?: Date;
+// }
 
 let paintingList = ref([]);
 let isLoading = ref(false);
 let focusImageUrl = ref('');
 const imageModal = ref(null);
 
+/**
+ * 取得公開繪畫列表
+ */
 async function getPaintings() {
   isLoading.value = true;
-  const drawHistoryRef = collection(db, 'draw-history');
-  const q = query(
-    drawHistoryRef,
-    where('isShared', '==', true),
-    orderBy('created', 'desc'),
-  );
 
-  const querySnapshot = await getDocs(q);
+  const filter = where('isShared', '==', true);
+  const sort = orderBy('created', 'desc');
+
+  const querySnapshot = await apiGetPaintingList(filter, sort);
+
   let fbPaintings = [];
 
   querySnapshot.forEach((doc) => {
@@ -58,6 +70,10 @@ async function getPaintings() {
   isLoading.value = false;
 }
 
+/**
+ * 設定聚焦圖片並顯示彈窗
+ * @param {string} url 繪畫圖片檔 url
+ */
 function setFocusImage(url) {
   focusImageUrl.value = url;
   imageModal.value.showModal();

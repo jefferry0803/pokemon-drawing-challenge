@@ -79,8 +79,7 @@
 import { Modal } from 'bootstrap';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useUserStore } from '../stores/user';
-import { doc, updateDoc } from 'firebase/firestore';
-import db from '../firebase/index';
+import { apiUpdatePainting } from '@/api/painting';
 
 const emit = defineEmits(['reset', 'toDrawHistory']);
 const props = defineProps({
@@ -97,30 +96,42 @@ const shareBtnText = computed(() => {
   return isShared.value ? '已分享' : '分享到畫廊';
 });
 
+/**
+ * 重置遊戲
+ */
 function reset() {
   emit('reset');
 }
+/**
+ * 下載畫作
+ */
 function downloadDraw() {
   let a = document.createElement('a');
   a.href = props.pokemonDrawUrl;
   a.download = props.pokemonName || 'default.png';
   a.dispatchEvent(new MouseEvent('click'));
 }
+/**
+ * 分享到公共畫廊
+ */
 async function shareToGallery() {
-  const paintingRef = doc(db, 'draw-history', paintingId.value);
-
-  await updateDoc(paintingRef, {
-    isShared: true,
-  });
+  await apiUpdatePainting(paintingId.value, { isShared: true });
 
   isShared.value = true;
 }
 
+/**
+ * 打開彈窗(暴露給上層使用)
+ * @param {string} id 繪畫 id
+ */
 function showModal(id) {
   paintingId.value = id;
   isShared.value = false;
   modal.value.show();
 }
+/**
+ * 關閉彈窗
+ */
 function hideModal() {
   modal.value.hide();
 }

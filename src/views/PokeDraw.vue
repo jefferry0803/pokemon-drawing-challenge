@@ -80,7 +80,7 @@
       :pokemon-draw-url="pokemonDrawUrl"
       :pokemon-name="pokemonName"
       @reset="reset"
-      @to-draw-history="toDrawHistory"
+      @to-draw-history="router.push({ path: '/history' })"
     />
     <LoadingDots v-if="isSavingResult" :title="'結果儲存中'" />
   </div>
@@ -96,9 +96,8 @@ import axios from 'axios';
 import useCanvas from '../composables/canvas.js';
 import usePokeApi from '../composables/pokeApi.js';
 import { useUserStore } from '../stores/user';
-import db from '../firebase/index';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import router from '../router';
+import { apiCreatePainting } from '@/api/painting';
 
 const { paletteColors } = useCanvas();
 const { getLanguageContent, getColorChineseName } = usePokeApi();
@@ -111,6 +110,9 @@ const startModal = ref(null);
 const resultModal = ref(null);
 let isSavingResult = ref(false);
 
+/**
+ * 開始計時
+ */
 function startTimer() {
   timer.value = setInterval(() => {
     if (secondsLeft.value <= 0) {
@@ -122,6 +124,9 @@ function startTimer() {
   }, 1000);
 }
 
+/**
+ * 時間到
+ */
 async function timesUp() {
   handleMousUp();
   ctx.value.globalCompositeOperation = 'destination-over';
@@ -139,6 +144,10 @@ async function timesUp() {
     resultModal.value.showModal();
   }
 }
+
+/**
+ * 重置遊戲
+ */
 function reset() {
   getPokemon();
   secondsLeft.value = 60;
@@ -148,17 +157,17 @@ function reset() {
   setColor('#000000');
   ctx.value.globalCompositeOperation = 'source-over';
 }
-function toDrawHistory() {
-  router.push({ path: '/history' });
-}
+/**
+ * 儲存結果到資料庫
+ * @returns {Promise} 返回儲存結果的 Promise
+ */
 function saveResult() {
-  return addDoc(collection(db, 'draw-history'), {
+  return apiCreatePainting({
     paintingUrl: pokemonDrawUrl.value,
     pokemonName: pokemonName.value,
     userId: userStore.userId,
     username: userStore.username,
     isShared: false,
-    created: serverTimestamp(),
   });
 }
 
@@ -171,6 +180,9 @@ let pokemonImgUrl = ref('');
 let pokemonDrawUrl = ref('');
 let isPokemonLoading = ref(false);
 
+/**
+ * 取得寶可夢資料
+ */
 function getPokemon() {
   isPokemonLoading.value = true;
   startModal.value.hideModal();
@@ -192,6 +204,10 @@ function getPokemon() {
       startTimer();
     });
 }
+/**
+ * 依照範圍取得隨機數
+ * @param {number} range 範圍(最大數字)
+ */
 function getRandomNum(range) {
   return Math.floor(Math.random() * range) + 1;
 }
