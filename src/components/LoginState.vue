@@ -1,8 +1,16 @@
 <template>
-  <div class="loginState">
-    <span class="mobile-none" :class="{ 'd-none': !userStore.token }">以</span>
+  <div
+    class="loginState position:fixed top:10px right:10px font:1.25rem z:2 b:3px|solid|$(black) r:15px bg:$(pokemon-yellow) p:0.5rem box-shadow:0px|4px|15px|rgb(23|44|120/20%) {top:50px;right:50px}@sm"
+  >
+    <span
+      class="d:none"
+      :class="{ 'd:none': !userStore.token, 'd:inline@sm': userStore.token }"
+      >以</span
+    >
     {{ loginStateDisplay }}
-    <span class="mobile-none" :class="{ 'd-none': !userStore.token }"
+    <span
+      class="d:none"
+      :class="{ 'd:none': !userStore.token, 'd:inline@sm': userStore.token }"
       >登入中</span
     >
   </div>
@@ -13,7 +21,10 @@ import { computed } from 'vue';
 import { useUserStore } from '../stores/user';
 
 defineProps({
-  username: String,
+  username: {
+    type: String,
+    default: '',
+  },
 });
 
 const userStore = useUserStore();
@@ -22,28 +33,3 @@ const loginStateDisplay = computed(() => {
   return userStore.token ? userStore.username : '未登入';
 });
 </script>
-
-<style scoped>
-.loginState {
-  position: fixed;
-  top: 50px;
-  right: 50px;
-  font-size: 1.25rem;
-  z-index: 2;
-  border: 3px solid #000;
-  border-radius: 15px;
-  background: var(--pokemon-yellow);
-  padding: 0.5rem;
-  box-shadow: 0px 4px 15px rgb(23 44 120 / 20%);
-}
-
-@media (max-width: 768px) {
-  .loginState {
-    top: 10px;
-    right: 10px;
-  }
-  .mobile-none {
-    display: none;
-  }
-}
-</style>

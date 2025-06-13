@@ -39,9 +39,12 @@ userStore.autoLogin();
   --dark-green: #163a38;
   --green: #449641;
   --sand: #f4efd2;
+  --dark-sand: #cdbc85;
   --dark-grey-text: #525252;
   --pokemon-yellow: #ffcc03;
   --pokemon-blue: #386abb;
+  --white: #ffffff;
+  --black: #000000;
 }
 
 body {

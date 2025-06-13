@@ -8,8 +8,10 @@
     data-bs-backdrop="static"
   >
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
+      <div
+        class="modal-content {bg:$(sand);color:$(dark-grey-text)}.modal-content"
+      >
+        <div class="modal-header b:none.modal-header">
           <h1 id="myModalLabel" class="modal-title fs-2">
             <slot name="title">標題</slot>
           </h1>
@@ -17,7 +19,7 @@
         <div class="modal-body fs-5">
           <slot name="content">內容</slot>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer {b:none!;jc:center}.modal-footer">
           <slot name="footer-buttons">
             <button class="btn btn-secondary">按鈕一</button>
           </slot>
@@ -49,19 +51,3 @@ onUnmounted(() => {
   hideModal();
 });
 </script>
-
-<style scoped>
-.modal-header,
-.modal-footer {
-  border: none;
-}
-
-.modal-footer {
-  justify-content: center;
-}
-
-.modal-content {
-  background: var(--sand);
-  color: var(--dark-grey-text);
-}
-</style>

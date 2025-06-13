@@ -6,7 +6,9 @@
     aria-labelledby="imageModalLabel"
     aria-hidden="true"
   >
-    <div class="modal-dialog modal-dialog-centered">
+    <div
+      class="modal-dialog modal-dialog-centered max-w:calc(100%-40px).modal-dialog"
+    >
       <div class="modal-content">
         <div class="modal-body">
           <div class="img-container">
@@ -23,7 +25,10 @@ import { Modal } from 'bootstrap';
 import { ref, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
-  imageUrl: String,
+  imageUrl: {
+    type: String,
+    required: true,
+  },
 });
 
 defineExpose({ showModal });
@@ -44,9 +49,3 @@ onUnmounted(() => {
   hideModal();
 });
 </script>
-
-<style scoped>
-.modal-dialog {
-  max-width: max-content;
-}
-</style>
