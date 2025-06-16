@@ -31,20 +31,20 @@
         <span v-show="currentColor === color" class="color-selected">✔</span>
       </div>
       <div class="button button-function" @click="undo">
-        <font-awesome-icon icon="fa-solid fa-rotate-left" />
+        <PdcIcon icon="undo-rounded" />
       </div>
       <div class="button button-function" @click="redo">
-        <font-awesome-icon icon="fa-solid fa-rotate-right" />
+        <PdcIcon icon="redo-rounded" />
       </div>
       <div
         :class="{ 'eraser-selected': currentColor === '#ffffff' }"
         class="button button-function"
         @click="setColor('#ffffff')"
       >
-        <font-awesome-icon icon="fa-solid fa-eraser" />
+        <PdcIcon icon="ink-eraser-rounded" />
       </div>
       <div class="button button-function" @click="allClear">
-        <font-awesome-icon icon="fa-regular fa-file" />
+        <PdcIcon icon="trash-can" icon-prefix="mdi" />
       </div>
     </div>
     <div ref="canvasContainer" class="canvas-container">
@@ -98,6 +98,7 @@ import usePokeApi from '../composables/pokeApi.js';
 import { useUserStore } from '../stores/user';
 import router from '../router';
 import { apiCreatePainting } from '@/api/painting';
+import PdcIcon from '@/components/PdcIcon.vue';
 
 const { paletteColors } = useCanvas();
 const { getLanguageContent, getColorChineseName } = usePokeApi();
