@@ -1,38 +1,62 @@
 <template>
   <div
-    class="modal fade"
     id="resultModal"
+    class="modal fade"
     tabindex="-1"
     aria-labelledby="resultModalLabel"
     aria-hidden="true"
     data-bs-backdrop="static"
   >
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title" id="resultModalLabel">遊戲結束!</h1>
+    <div
+      class="modal-dialog modal-dialog-centered max-w:max-content.modal-dialog"
+    >
+      <div
+        class="modal-content {bg:$(sand);color:$(dark-grey-text)}.modal-content"
+      >
+        <div
+          class="modal-header {b:none;d:flex;justify-content:center}.modal-header"
+        >
+          <h1 id="resultModalLabel" class="modal-title">遊戲結束!</h1>
         </div>
         <div class="modal-body">
-          <div class="result-comparison">
-            <div class="img-container">
-              <h2 class="pic-title">他長這樣</h2>
-              <img class="img" :src="pokemonImgUrl" alt="" />
+          <div
+            class="result-comparison d:flex flex:col flex:row@sm align-items:center align-items:normal@sm"
+          >
+            <div
+              class="img-container d:flex flex-direction:column align-items:center max-w:100% w:500px"
+            >
+              <h2
+                class="pic-title bg:$(dark-green) color:$(white) r:15px p:0.5rem|1rem"
+              >
+                他長這樣
+              </h2>
+              <img class="w:100%" :src="pokemonImgUrl" alt="" />
             </div>
-            <div class="draw-container">
-              <h2 class="pic-title">你畫這樣</h2>
-              <img class="img" :src="pokemonDrawUrl" alt="" />
+            <div
+              class="draw-container d:flex flex-direction:column align-items:center max-w:100% w:800px"
+            >
+              <h2
+                class="pic-title bg:$(dark-green) color:$(white) r:15px p:0.5rem|1rem"
+              >
+                你畫這樣
+              </h2>
+              <img class="w:100%" :src="pokemonDrawUrl" alt="" />
             </div>
           </div>
           <p v-if="!userStore.token" class="text-center mt-3 mb-0">
             您目前沒有登入，畫作將不會保存，要不要考慮
-            <router-link to="/login" class="text-primary">登入</router-link>
+            <router-link to="/login"> 登入 </router-link>
             或是
-            <router-link to="/signup" class="text-primary">註冊</router-link>
+            <router-link to="/signup"> 註冊 </router-link>
             呢?
           </p>
         </div>
-        <div class="modal-footer">
-          <div class="btns-container">
+        <div
+          class="modal-footer {b:none!;d:flex;justify-content:end}.modal-footer justify-content:space-between.modal-footer@xs"
+        >
+          <div
+            class="btns-container d:flex flex:wrap justify-content:end gap:1rem"
+          >
             <button
               type="button"
               class="btn btn-lg btn-success"
@@ -49,24 +73,35 @@
               再來一局
             </button>
           </div>
-          <div class="btns-container">
+          <div
+            class="btns-container d:flex flex:wrap justify-content:end gap:1rem"
+          >
             <button
+              v-if="userStore.token"
               type="button"
               class="btn btn-lg btn-primary"
               :disabled="isShared"
-              v-if="userStore.token"
             >
-              <a @click.prevent="shareToGallery" href="#">{{ shareBtnText }}</a>
+              <a
+                href="#"
+                class="color:$(white)"
+                @click.prevent="shareToGallery"
+                >{{ shareBtnText }}</a
+              >
             </button>
             <button
+              v-if="userStore.token"
               type="button"
               class="btn btn-lg btn-primary"
-              v-if="userStore.token"
             >
-              <router-link to="/history"> 繪畫記錄 </router-link>
+              <router-link to="/history" class="color:$(white)">
+                繪畫記錄
+              </router-link>
             </button>
             <button type="button" class="btn btn-lg btn-primary">
-              <router-link to="/gallery"> 公共畫廊 </router-link>
+              <router-link to="/gallery" class="color:$(white)">
+                公共畫廊
+              </router-link>
             </button>
           </div>
         </div>
@@ -76,128 +111,79 @@
 </template>
 
 <script setup>
-import { Modal } from "bootstrap";
-import { ref, onMounted, onUnmounted, computed } from "vue";
-import { useUserStore } from "../stores/user";
-import { doc, updateDoc } from "firebase/firestore";
-import db from "../firebase/index";
+import { Modal } from 'bootstrap';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useUserStore } from '../stores/user';
+import { apiUpdatePainting } from '@/api/painting';
 
-const emit = defineEmits(["reset", "toDrawHistory"]);
+const emit = defineEmits(['reset', 'toDrawHistory']);
 const props = defineProps({
-  pokemonImgUrl: String,
-  pokemonDrawUrl: String,
-  pokemonName: String,
+  pokemonImgUrl: {
+    type: String,
+    default: '',
+  },
+  pokemonDrawUrl: {
+    type: String,
+    default: '',
+  },
+  pokemonName: {
+    type: String,
+    default: '',
+  },
 });
 defineExpose({ showModal });
 const userStore = useUserStore();
 const modal = ref(null);
-const paintingId = ref("");
+const paintingId = ref('');
 let isShared = ref(false);
 const shareBtnText = computed(() => {
-  return isShared.value ? "已分享" : "分享到畫廊";
+  return isShared.value ? '已分享' : '分享到畫廊';
 });
 
+/**
+ * 重置遊戲
+ */
 function reset() {
-  emit("reset");
+  emit('reset');
 }
+/**
+ * 下載畫作
+ */
 function downloadDraw() {
-  let a = document.createElement("a");
+  let a = document.createElement('a');
   a.href = props.pokemonDrawUrl;
-  a.download = props.pokemonName || "default.png";
-  a.dispatchEvent(new MouseEvent("click"));
+  a.download = props.pokemonName || 'default.png';
+  a.dispatchEvent(new MouseEvent('click'));
 }
+/**
+ * 分享到公共畫廊
+ */
 async function shareToGallery() {
-  const paintingRef = doc(db, "draw-history", paintingId.value);
-
-  await updateDoc(paintingRef, {
-    isShared: true,
-  });
+  await apiUpdatePainting(paintingId.value, { isShared: true });
 
   isShared.value = true;
 }
 
+/**
+ * 打開彈窗(暴露給上層使用)
+ * @param {string} id 繪畫 id
+ */
 function showModal(id) {
   paintingId.value = id;
   isShared.value = false;
   modal.value.show();
 }
+/**
+ * 關閉彈窗
+ */
 function hideModal() {
   modal.value.hide();
 }
 
 onMounted(() => {
-  modal.value = new Modal("#resultModal");
+  modal.value = new Modal('#resultModal');
 });
 onUnmounted(() => {
   hideModal();
 });
 </script>
-
-<style scoped>
-a {
-  color: #fff;
-}
-.modal-content {
-  background: var(--sand);
-  color: var(--dark-grey-text);
-}
-.modal-header,
-.modal-footer {
-  border: none;
-  display: flex;
-  justify-content: space-between;
-}
-.modal-header {
-  justify-content: center;
-}
-.img {
-  width: 100%;
-}
-.img-container,
-.draw-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 100%;
-}
-.img-container {
-  width: 500px;
-}
-.draw-container {
-  width: 800px;
-}
-.result-comparison {
-  display: flex;
-}
-.modal-dialog {
-  max-width: max-content;
-}
-.green-btn {
-  background: var(--green);
-  color: #fff;
-}
-.pic-title {
-  background: var(--dark-green);
-  color: #fff;
-  border-radius: 15px;
-  padding: 0.5rem 1rem;
-}
-.btns-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: end;
-  gap: 1rem;
-}
-
-@media (max-width: 768px) {
-  .result-comparison {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-@media (max-width: 576px) {
-  .modal-footer {
-    justify-content: end;
-  }
-}
-</style>

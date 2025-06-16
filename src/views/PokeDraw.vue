@@ -5,18 +5,20 @@
         <BaseSpinner />
       </template>
       <template v-else>
-        <h2 class="topic-pokemonName">題目: {{ pokemonName || "???" }}</h2>
+        <h2 class="topic-pokemonName">題目: {{ pokemonName || '???' }}</h2>
         <div class="topic-extraInfo" :class="{ myCollapse: isTopicCollapse }">
-          <p class="topic-description">{{ pokemonDesc || "???" }}</p>
-          <p class="topic-color">主色: {{ pokemonColor || "???" }}</p>
+          <p class="topic-description">
+            {{ pokemonDesc || '???' }}
+          </p>
+          <p class="topic-color">主色: {{ pokemonColor || '???' }}</p>
         </div>
-        <div @click="toggleTopic" class="topic-collapseBtn">
+        <div class="topic-collapseBtn" @click="toggleTopic">
           {{ topicCollapseBtn }}
         </div>
       </template>
     </div>
     <div class="sidebar" :class="{ hide: !isSidebarShow }">
-      <div @click="toggleSidebar" class="sidebar-hideBtn">
+      <div class="sidebar-hideBtn" @click="toggleSidebar">
         {{ hideSidebarBtn }}
       </div>
       <div
@@ -28,46 +30,46 @@
       >
         <span v-show="currentColor === color" class="color-selected">✔</span>
       </div>
-      <div @click="undo" class="button button-function">
+      <div class="button button-function" @click="undo">
         <font-awesome-icon icon="fa-solid fa-rotate-left" />
       </div>
-      <div @click="redo" class="button button-function">
+      <div class="button button-function" @click="redo">
         <font-awesome-icon icon="fa-solid fa-rotate-right" />
       </div>
       <div
         :class="{ 'eraser-selected': currentColor === '#ffffff' }"
-        @click="setColor('#ffffff')"
         class="button button-function"
+        @click="setColor('#ffffff')"
       >
         <font-awesome-icon icon="fa-solid fa-eraser" />
       </div>
-      <div @click="allClear" class="button button-function">
+      <div class="button button-function" @click="allClear">
         <font-awesome-icon icon="fa-regular fa-file" />
       </div>
     </div>
     <div ref="canvasContainer" class="canvas-container">
       <canvas
+        ref="pokeCanvas"
+        class="pokeCanvas"
         @touchmove.prevent
         @pointerdown.prevent="handleMouseDown"
         @pointermove.prevent="handleMouseMove"
         @pointerup.prevent="handleMousUp"
-        ref="pokeCanvas"
-        class="pokeCanvas"
-      ></canvas>
+      />
     </div>
     <div class="timeBar-outer">
       <div
         :style="{ width: Math.floor((secondsLeft / 60) * 100) + '%' }"
         class="timeBar-inner"
-      ></div>
+      />
     </div>
     <BaseModal ref="startModal">
-      <template #title>遊戲規則</template>
-      <template #content
-        >系統會隨機產生一種寶可夢，請在限時1分鐘以內畫出來!</template
-      >
+      <template #title> 遊戲規則 </template>
+      <template #content>
+        系統會隨機產生一種寶可夢，請在限時1分鐘以內畫出來!
+      </template>
       <template #footer-buttons>
-        <button @click="getPokemon" type="button" class="btn btn-lg green-btn">
+        <button type="button" class="btn btn-lg green-btn" @click="getPokemon">
           我了解了
         </button>
       </template>
@@ -78,25 +80,24 @@
       :pokemon-draw-url="pokemonDrawUrl"
       :pokemon-name="pokemonName"
       @reset="reset"
-      @to-draw-history="toDrawHistory"
+      @to-draw-history="router.push({ path: '/history' })"
     />
     <LoadingDots v-if="isSavingResult" :title="'結果儲存中'" />
   </div>
 </template>
 
 <script setup>
-import BaseModal from "../components/BaseModal.vue";
-import BaseSpinner from "../components/BaseSpinner.vue";
-import ResultModal from "../components/ResultModal.vue";
-import LoadingDots from "../components/LoadingDots.vue";
-import { ref, onMounted, onUnmounted, computed } from "vue";
-import axios from "axios";
-import useCanvas from "../composables/canvas.js";
-import usePokeApi from "../composables/pokeApi.js";
-import { useUserStore } from "../stores/user";
-import db from "../firebase/index";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import router from "../router";
+import BaseModal from '../components/BaseModal.vue';
+import BaseSpinner from '../components/BaseSpinner.vue';
+import ResultModal from '../components/ResultModal.vue';
+import LoadingDots from '../components/LoadingDots.vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import axios from 'axios';
+import useCanvas from '../composables/canvas.js';
+import usePokeApi from '../composables/pokeApi.js';
+import { useUserStore } from '../stores/user';
+import router from '../router';
+import { apiCreatePainting } from '@/api/painting';
 
 const { paletteColors } = useCanvas();
 const { getLanguageContent, getColorChineseName } = usePokeApi();
@@ -109,6 +110,9 @@ const startModal = ref(null);
 const resultModal = ref(null);
 let isSavingResult = ref(false);
 
+/**
+ * 開始計時
+ */
 function startTimer() {
   timer.value = setInterval(() => {
     if (secondsLeft.value <= 0) {
@@ -120,10 +124,13 @@ function startTimer() {
   }, 1000);
 }
 
+/**
+ * 時間到
+ */
 async function timesUp() {
   handleMousUp();
-  ctx.value.globalCompositeOperation = "destination-over";
-  ctx.value.fillStyle = "#fff";
+  ctx.value.globalCompositeOperation = 'destination-over';
+  ctx.value.fillStyle = '#fff';
   ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
   pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
 
@@ -137,59 +144,70 @@ async function timesUp() {
     resultModal.value.showModal();
   }
 }
+
+/**
+ * 重置遊戲
+ */
 function reset() {
   getPokemon();
   secondsLeft.value = 60;
   undoList.value = [];
   redoList.value = [];
   allClear();
-  setColor("#000000");
-  ctx.value.globalCompositeOperation = "source-over";
+  setColor('#000000');
+  ctx.value.globalCompositeOperation = 'source-over';
 }
-function toDrawHistory() {
-  router.push({ path: "/history" });
-}
+/**
+ * 儲存結果到資料庫
+ * @returns {Promise} 返回儲存結果的 Promise
+ */
 function saveResult() {
-  return addDoc(collection(db, "draw-history"), {
+  return apiCreatePainting({
     paintingUrl: pokemonDrawUrl.value,
     pokemonName: pokemonName.value,
     userId: userStore.userId,
     username: userStore.username,
     isShared: false,
-    created: serverTimestamp(),
   });
 }
 
 // 寶可夢
-let pokemonId = ref("");
-let pokemonName = ref("");
-let pokemonDesc = ref("");
-let pokemonColor = ref("");
-let pokemonImgUrl = ref("");
-let pokemonDrawUrl = ref("");
+let pokemonId = ref('');
+let pokemonName = ref('');
+let pokemonDesc = ref('');
+let pokemonColor = ref('');
+let pokemonImgUrl = ref('');
+let pokemonDrawUrl = ref('');
 let isPokemonLoading = ref(false);
 
+/**
+ * 取得寶可夢資料
+ */
 function getPokemon() {
   isPokemonLoading.value = true;
   startModal.value.hideModal();
   pokemonId.value = getRandomNum(905);
   axios
-    .get("https://pokeapi.co/api/v2/pokemon-species/" + pokemonId.value)
+    .get('https://pokeapi.co/api/v2/pokemon-species/' + pokemonId.value)
     .then((res) => {
       const names = res.data.names;
       const descs = res.data.flavor_text_entries;
       const color = res.data.color.name;
 
-      pokemonName.value = getLanguageContent(names, "zh-Hant").name;
+      pokemonName.value = getLanguageContent(names, 'zh-Hant').name;
       pokemonColor.value = getColorChineseName(color);
-      const chDesc = getLanguageContent(descs, "zh-Hant").flavor_text;
-      pokemonDesc.value = chDesc ? chDesc.replace(/\s+/g, "") : "";
+      const chDesc = getLanguageContent(descs, 'zh-Hant').flavor_text;
+      pokemonDesc.value = chDesc ? chDesc.replace(/\s+/g, '') : '';
       pokemonImgUrl.value = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId.value}.png`;
 
       isPokemonLoading.value = false;
       startTimer();
     });
 }
+/**
+ * 依照範圍取得隨機數
+ * @param {number} range 範圍(最大數字)
+ */
 function getRandomNum(range) {
   return Math.floor(Math.random() * range) + 1;
 }
@@ -197,22 +215,22 @@ function getRandomNum(range) {
 // 畫板相關
 const pokeCanvas = ref(null);
 let ctx = ref(null);
-const canvasContainer = ref("canvasContainer");
+const canvasContainer = ref('canvasContainer');
 let isMouseDown = ref(false);
 let lastX = 0;
 let lastY = 0;
-let currentColor = ref("#000000");
+let currentColor = ref('#000000');
 let undoList = ref([]);
 let redoList = ref([]);
 let isSidebarShow = ref(true);
 let isTopicCollapse = ref(false);
 
 function initCanvas() {
-  ctx.value = pokeCanvas.value.getContext("2d");
+  ctx.value = pokeCanvas.value.getContext('2d');
   ctx.value.strokeStyle = currentColor;
   ctx.value.lineWidth = 10;
-  ctx.value.lineJoin = "round";
-  ctx.value.lineCap = "round";
+  ctx.value.lineJoin = 'round';
+  ctx.value.lineCap = 'round';
 }
 function resizeCanvas() {
   pokeCanvas.value.width = canvasContainer.value.getBoundingClientRect().width;
@@ -262,7 +280,7 @@ function undo() {
       0,
       0,
       pokeCanvas.value.width,
-      pokeCanvas.value.height
+      pokeCanvas.value.height,
     );
   };
 }
@@ -279,7 +297,7 @@ function redo() {
       0,
       0,
       pokeCanvas.value.width,
-      pokeCanvas.value.height
+      pokeCanvas.value.height,
     );
     undoList.value.push(redoList.value.pop());
   };
@@ -292,7 +310,7 @@ function setColor(color) {
   currentColor.value = color;
   ctx.value.strokeStyle = color;
 
-  if (color === "#ffffff") {
+  if (color === '#ffffff') {
     ctx.value.lineWidth = 50;
   } else {
     ctx.value.lineWidth = 10;
@@ -305,13 +323,13 @@ function toggleTopic() {
   isTopicCollapse.value = !isTopicCollapse.value;
 }
 const hideSidebarBtn = computed(() => {
-  return isSidebarShow.value ? "▶" : "◀";
+  return isSidebarShow.value ? '▶' : '◀';
 });
 const topicCollapseBtn = computed(() => {
-  return isTopicCollapse.value ? "▼" : "▲";
+  return isTopicCollapse.value ? '▼' : '▲';
 });
 
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
 onMounted(() => {
   startModal.value.showModal();
   resizeCanvas();
@@ -320,7 +338,7 @@ onMounted(() => {
 });
 onUnmounted(() => {
   clearInterval(timer.value);
-  window.removeEventListener("resize", resizeCanvas);
+  window.removeEventListener('resize', resizeCanvas);
 });
 </script>
 

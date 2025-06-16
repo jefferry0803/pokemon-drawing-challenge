@@ -1,6 +1,6 @@
 <template>
   <div class="drawHistory-container container">
-    <BaseSpinner class="spinner" v-if="isLoading" />
+    <BaseSpinner v-if="isLoading" class="spinner" />
     <h1 class="drawHistory-title">繪畫紀錄</h1>
     <div class="paintings-container">
       <template v-for="painting in paintingList" :key="painting.id">
@@ -43,39 +43,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import ImageModal from "../components/ImageModal.vue";
-import BaseSpinner from "../components/BaseSpinner.vue";
-import { useUserStore } from "../stores/user";
+import { ref, onMounted } from 'vue';
+import ImageModal from '../components/ImageModal.vue';
+import BaseSpinner from '../components/BaseSpinner.vue';
+import { useUserStore } from '../stores/user';
+import { where, orderBy } from 'firebase/firestore';
 import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  deleteDoc,
-  updateDoc,
-  orderBy,
-} from "firebase/firestore";
-import db from "../firebase/index";
+  apiGetPaintingList,
+  apiDeletePainting,
+  apiUpdatePainting,
+} from '@/api/painting';
 
 const userStore = useUserStore();
 
 let paintingList = ref([]);
 let isLoading = ref(false);
-let focusImageUrl = ref("");
+let focusImageUrl = ref('');
 const imageModal = ref(null);
 
+/**
+ * 取得繪畫紀錄列表
+ */
 async function getPaintings() {
   isLoading.value = true;
-  const drawHistoryRef = collection(db, "draw-history");
-  const q = query(
-    drawHistoryRef,
-    where("userId", "==", userStore.userId),
-    orderBy("created", "desc")
-  );
 
-  const querySnapshot = await getDocs(q);
+  const filter = where('userId', '==', userStore.userId);
+  const sort = orderBy('created', 'desc');
+
+  const querySnapshot = await apiGetPaintingList(filter, sort);
   let fbPaintings = [];
 
   querySnapshot.forEach((doc) => {
@@ -94,35 +89,55 @@ async function getPaintings() {
   isLoading.value = false;
 }
 
+/**
+ * 刪除繪畫
+ * @param {string} id 繪畫 id
+ */
 async function deletePainting(id) {
-  await deleteDoc(doc(db, "draw-history", id));
+  await apiDeletePainting(id);
   getPaintings();
 }
 
+/**
+ * 切換繪畫分享狀態
+ * @param {string} paintingId 繪畫 id
+ * @param {boolean} isShared 目前分享狀態
+ */
 async function toggleIsShared(paintingId, isShared) {
-  const paintingRef = doc(db, "draw-history", paintingId);
-
-  await updateDoc(paintingRef, {
+  await apiUpdatePainting(paintingId, {
     isShared: !isShared,
   });
 
   getPaintings();
 }
 
+/**
+ * 下載繪畫圖檔
+ * @param {string} url 繪畫圖片檔 url
+ * @param {string} fileName 檔名
+ */
 function downloadPainting(url, fileName) {
-  let a = document.createElement("a");
+  let a = document.createElement('a');
   a.href = url;
-  a.download = fileName || "default.png";
-  a.dispatchEvent(new MouseEvent("click"));
+  a.download = fileName || 'default.png';
+  a.dispatchEvent(new MouseEvent('click'));
 }
 
+/**
+ * 設定聚焦圖片並顯示彈窗
+ * @param {string} url 繪畫圖片檔 url
+ */
 function setFocusImage(url) {
   focusImageUrl.value = url;
   imageModal.value.showModal();
 }
 
+/**
+ * 取得分享按鈕的文字
+ * @param {boolean} isShared 分享狀態
+ */
 function getShareBtnText(isShared) {
-  return isShared ? "已分享" : "分享到畫廊";
+  return isShared ? '已分享' : '分享到畫廊';
 }
 
 onMounted(() => {
@@ -219,7 +234,7 @@ onMounted(() => {
   display: none;
 }
 .shareBtn.shared:hover::before {
-  content: "取消分享";
+  content: '取消分享';
 }
 ::-webkit-scrollbar {
   width: 10px;

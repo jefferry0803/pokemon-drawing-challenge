@@ -1,59 +1,67 @@
-import { defineStore } from "pinia";
-import router from "../router";
-import axios from "axios";
+import { defineStore } from 'pinia';
+import router from '../router';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth';
+import { auth } from '../firebase';
 
-export const useUserStore = defineStore("user", {
+export const useUserStore = defineStore('user', {
   state: () => ({
-    username: "訪客",
-    userId: "",
-    token: "",
-    logoutTimer: "",
+    username: '訪客',
+    userId: '',
+    token: '',
+    logoutTimer: '',
   }),
   actions: {
+    /**
+     * 註冊
+     * @param {string} email 電子郵件
+     * @param {string} password 密碼
+     * @returns {Promise}
+     */
     signup(email, password) {
-      const data = {
-        email,
-        password,
-        returnSecureToken: true,
-      };
-      const url =
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC-mWBQB9BMbFZsR5DG0fxiNnLIq2e5fYM";
-
-      return axios.post(url, data);
+      return createUserWithEmailAndPassword(auth, email, password);
     },
+    /**
+     * 登入
+     * @param {string} email 電子郵件
+     * @param {string} password 密碼
+     * @returns {Promise}
+     */
     login(email, password) {
-      const data = {
-        email,
-        password,
-        returnSecureToken: true,
-      };
-      const url =
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyC-mWBQB9BMbFZsR5DG0fxiNnLIq2e5fYM";
+      return signInWithEmailAndPassword(auth, email, password).then((res) => {
+        const email = res.user.email;
+        const username = email.substring(0, email.search('@'));
 
-      return axios.post(url, data).then((res) => {
-        const email = res.data.email;
-        const username = email.substring(0, email.search("@"));
-
-        const expiresIn = +res.data.expiresIn * 1000;
+        const expiresIn = +res._tokenResponse.expiresIn * 1000;
         const expirationDate = new Date().getTime() + expiresIn;
 
-        localStorage.setItem("username", username);
-        localStorage.setItem("userId", res.data.localId);
-        localStorage.setItem("token", res.data.idToken);
-        localStorage.setItem("tokenExpiration", expirationDate);
+        localStorage.setItem('username', username);
+        localStorage.setItem('userId', res._tokenResponse.localId);
+        localStorage.setItem('token', res._tokenResponse.idToken);
+        localStorage.setItem('tokenExpiration', expirationDate);
 
         this.logoutTimer = setTimeout(() => {
           this.logout();
         }, expiresIn);
 
-        this.setUser(username, res.data.localId, res.data.idToken);
+        this.setUser(
+          username,
+          res._tokenResponse.localId,
+          res._tokenResponse.idToken,
+        );
       });
     },
+    /**
+     * 自動登入
+     */
     autoLogin() {
-      const username = localStorage.getItem("username");
-      const userId = localStorage.getItem("userId");
-      const token = localStorage.getItem("token");
-      const tokenExpiration = localStorage.getItem("tokenExpiration");
+      const username = localStorage.getItem('username');
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      const tokenExpiration = localStorage.getItem('tokenExpiration');
 
       const expiresIn = +tokenExpiration - new Date().getTime();
 
@@ -74,17 +82,22 @@ export const useUserStore = defineStore("user", {
       this.userId = userId;
       this.token = token;
     },
+    /**
+     * 登出
+     */
     logout() {
-      localStorage.removeItem("username");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenExpiration");
+      signOut(auth).then(() => {
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('token');
+        localStorage.removeItem('tokenExpiration');
 
-      clearTimeout(this.logoutTimer);
+        clearTimeout(this.logoutTimer);
 
-      this.setUser(null, null, null);
+        this.setUser(null, null, null);
 
-      router.replace("/login");
+        router.replace('/login');
+      });
     },
   },
 });

@@ -1,45 +1,42 @@
 <template>
-  <button :style="styleObject" class="base-button" @click="handleClick">
+  <button
+    :style="styleObject"
+    class="base-button f:1.5rem b:3px|solid|$(black) r:13px p:0.25rem|1.5rem filter:brightness(85%):hover"
+    :class="[`bg:${backgroundColor}`, `fg:${textColor}`]"
+    @click="handleClick"
+  >
     {{ text }}
   </button>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed } from 'vue';
 
 const props = defineProps({
-  backgroundColor: String,
-  text: String,
+  backgroundColor: {
+    type: String,
+    default: '#FFFFFF',
+  },
+  text: {
+    type: String,
+    default: '',
+  },
   textColor: {
     type: String,
-    default: "#000",
+    default: '#000000',
   },
 });
 
-const emit = defineEmits(["clickCallback"]);
+const emit = defineEmits(['clickCallback']);
 
 const styleObject = computed(() => {
   return {
-    "--background-color": props.backgroundColor,
-    "--text-color": props.textColor,
+    '--background-color': props.backgroundColor,
+    '--text-color': props.textColor,
   };
 });
 
 function handleClick() {
-  emit("clickCallback");
+  emit('clickCallback');
 }
 </script>
-
-<style scoped>
-.base-button {
-  border: 3px solid #000;
-  font-size: 1.5rem;
-  border-radius: 13px;
-  padding: 0.25rem 1.5rem;
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-.base-button:hover {
-  filter: brightness(85%);
-}
-</style>

@@ -12,8 +12,11 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  title: String,
+defineProps({
+  title: {
+    type: String,
+    default: '',
+  },
 });
 </script>
 

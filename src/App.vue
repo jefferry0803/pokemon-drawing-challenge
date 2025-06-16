@@ -17,10 +17,11 @@
 </template>
 
 <script setup>
-import PdcLogo from "./components/PdcLogo.vue";
-import LoginState from "./components/LoginState.vue";
-import NavBar from "./components/NavBar.vue";
-import { useUserStore } from "./stores/user";
+import PdcLogo from './components/PdcLogo.vue';
+import LoginState from './components/LoginState.vue';
+import NavBar from './components/NavBar.vue';
+import { useUserStore } from './stores/user';
+import '@master/css';
 
 const userStore = useUserStore();
 
@@ -28,64 +29,79 @@ userStore.autoLogin();
 </script>
 
 <style lang="scss">
-@import "bootstrap/scss/bootstrap";
+@import 'bootstrap/scss/bootstrap';
 </style>
 
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC&family=Roboto&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&family=Roboto&display=swap');
+
 :root {
   --dark-green: #163a38;
   --green: #449641;
   --sand: #f4efd2;
+  --dark-sand: #cdbc85;
   --dark-grey-text: #525252;
   --pokemon-yellow: #ffcc03;
   --pokemon-blue: #386abb;
+  --white: #ffffff;
+  --black: #000000;
 }
+
 body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Noto Sans TC", "Roboto", sans-serif;
+  font-family: 'Noto Sans TC', 'Roboto', sans-serif;
 }
+
 a {
   text-decoration: none;
 }
+
 .rel {
   position: relative;
 }
+
 .container {
   max-width: unset;
 }
+
 @media (max-width: 576px) {
   .main {
     width: 90%;
   }
 }
+
 @media (min-width: 576px) {
   .container {
     width: 540px;
   }
 }
+
 @media (min-width: 768px) {
   .container {
     width: 720px;
   }
 }
+
 @media (min-width: 992px) {
   .container {
     width: 960px;
   }
 }
+
 @media (min-width: 1200px) {
   .container {
     width: 1140px;
   }
 }
+
 @media (min-width: 1400px) {
   .container {
     width: 1320px;
   }
 }
+
 @media (min-width: 1800px) {
   .container {
     width: 1600px;
@@ -104,11 +120,13 @@ a {
   justify-content: center;
   align-items: center;
 }
+
 .main {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 .background-reference {
   position: fixed;
   bottom: 5px;

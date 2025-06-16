@@ -1,81 +1,46 @@
 <template>
-  <nav class="navBar">
-    <ul class="navButton-container">
+  <nav class="navBar align-self:flex-start w:100%">
+    <ul
+      class="navButton-container list-style:none m:0 p:0 d:flex flex-wrap:wrap-reverse max-w:90%"
+    >
+      <!-- 登入/登出按鈕 -->
       <li>
-        <router-link @click="userStore.logout" class="navButton" to="/login">{{
-          logInOutBtn
-        }}</router-link>
+        <NavButton to="login" @click="userStore.logout">
+          {{ logInOutBtn }}
+        </NavButton>
       </li>
-      <li>
-        <router-link class="navButton" to="/signup">註冊</router-link>
-      </li>
-      <li>
-        <router-link class="navButton" to="/pokedraw">前往繪畫</router-link>
-      </li>
-      <li v-if="userStore.token">
-        <router-link class="navButton" to="/history">繪畫紀錄</router-link>
-      </li>
-      <li>
-        <router-link class="navButton" to="/gallery">公共畫廊</router-link>
+      <!-- 其他路由按鈕 -->
+      <li v-for="route in routes" :key="route.path">
+        <NavButton :to="route.path">
+          {{ route.meta?.title }}
+        </NavButton>
       </li>
     </ul>
   </nav>
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useUserStore } from "../stores/user";
+import { computed } from 'vue';
+import { useUserStore } from '../stores/user';
+import { useRouter } from 'vue-router';
+import NavButton from './NavButton.vue';
 
 const userStore = useUserStore();
+const router = useRouter();
+
+const routes = computed(() => {
+  return router.getRoutes().filter((route) => {
+    // 過濾掉 home 和 login 路由
+    if (route.name === 'home' || route.name === 'login') return false;
+
+    // 如果路由需要認證且用戶未登入，則不顯示
+    if (route.meta?.requiresAuth && !userStore.token) return false;
+
+    return true;
+  });
+});
 
 const logInOutBtn = computed(() => {
-  return userStore.token ? "登出" : "登入";
+  return userStore.token ? '登出' : '登入';
 });
 </script>
-
-<style scoped>
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-a {
-  color: #000;
-}
-a:hover {
-  color: #000;
-}
-.navBar {
-  align-self: flex-start;
-  width: 100%;
-}
-.navButton-container {
-  display: flex;
-  flex-wrap: wrap-reverse;
-  max-width: 90%;
-}
-.navButton {
-  display: inline-block;
-  background: #cdbc85;
-  padding: 0.5rem 1rem;
-  border: 3px solid #000;
-  border-bottom: none;
-  border-radius: 10px 10px 0 0;
-  margin-bottom: -3px;
-}
-.navButton:hover {
-  background: var(--sand);
-}
-.router-link-active {
-  position: relative;
-  border-bottom: none;
-  z-index: 1;
-  background: var(--sand);
-}
-
-@media (max-width: 576px) {
-  .navButton {
-    padding: 0.25rem 0.5rem;
-  }
-}
-</style>

@@ -1,43 +1,43 @@
-import { createRouter, createWebHistory } from "vue-router";
-import { useUserStore } from "../stores/user";
+import { createRouter, createWebHistory } from 'vue-router';
+import { useUserStore } from '../stores/user';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
-      name: "home",
-      redirect: "/login",
+      path: '/',
+      name: 'home',
+      redirect: '/login',
     },
     {
-      path: "/login",
-      name: "login",
-      component: () => import("../views/LoginView.vue"),
-      meta: { requiresAuth: false },
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue'),
+      meta: { requiresAuth: false, title: '登入' },
     },
     {
-      path: "/signup",
-      name: "signup",
-      component: () => import("../views/SignupView.vue"),
-      meta: { requiresAuth: false },
+      path: '/signup',
+      name: 'signup',
+      component: () => import('../views/SignupView.vue'),
+      meta: { requiresAuth: false, title: '註冊' },
     },
     {
-      path: "/pokedraw",
-      name: "pokedraw",
-      component: () => import("../views/PokeDraw.vue"),
-      meta: { requiresAuth: false },
+      path: '/pokedraw',
+      name: 'pokedraw',
+      component: () => import('../views/PokeDraw.vue'),
+      meta: { requiresAuth: false, title: '前往繪畫' },
     },
     {
-      path: "/history",
-      name: "history",
-      component: () => import("../views/DrawHistory.vue"),
-      meta: { requiresAuth: true },
+      path: '/history',
+      name: 'history',
+      component: () => import('../views/DrawHistory.vue'),
+      meta: { requiresAuth: true, title: '繪畫紀錄' },
     },
     {
-      path: "/gallery",
-      name: "gallery",
-      component: () => import("../views/PublicGallery.vue"),
-      meta: { requiresAuth: false },
+      path: '/gallery',
+      name: 'gallery',
+      component: () => import('../views/PublicGallery.vue'),
+      meta: { requiresAuth: false, title: '公共畫廊' },
     },
   ],
 });
@@ -49,7 +49,7 @@ router.beforeEach((to, from, next) => {
     if (userStore.token) {
       next();
     } else {
-      next({ path: "/login" });
+      next({ path: '/login' });
     }
   } else {
     next();
