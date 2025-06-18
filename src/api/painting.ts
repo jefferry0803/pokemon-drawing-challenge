@@ -1,6 +1,7 @@
 import {
   collection,
   query,
+  getDoc,
   getDocs,
   doc,
   addDoc,
@@ -16,6 +17,14 @@ import type {
 } from 'firebase/firestore';
 
 /**
+ * 取得單一繪畫資料
+ */
+async function apiGetPainting(paintingId: string){
+  const paintingRef = doc(db, 'draw-history', paintingId);
+  return await getDoc(paintingRef);
+}
+
+/**
  * 向 firestore 取得繪畫列表
  */
 async function apiGetPaintingList(
@@ -26,8 +35,6 @@ async function apiGetPaintingList(
   const q = query(drawHistoryRef, filter, sort);
   return await getDocs(q);
 }
-
-async function apiGetPainting() {}
 
 /**
  * 新增繪畫記錄
@@ -61,8 +68,8 @@ async function apiDeletePainting(paintingId: string): Promise<void> {
 }
 
 export {
-  apiGetPaintingList,
   apiGetPainting,
+  apiGetPaintingList,
   apiCreatePainting,
   apiUpdatePainting,
   apiDeletePainting,

@@ -12,6 +12,23 @@
           <div class="painting-title">
             {{ painting.username }} 畫的 {{ painting.pokemonName }}
           </div>
+          <!--按讚按鈕 -->
+          <div
+            class="position:absolute bottom:10px left:10px d:flex align-items:center gap:4px"
+          >
+            <IconButton
+              v-if="userStore.token"
+              class="painting-like-btn"
+              :icon="getIsLiked(painting) ? 'heart' : 'heart-outline'"
+              icon-prefix="mdi"
+              :size="48"
+              :color="getIsLiked(painting) ? 'like-fill' : ''"
+              @click="toggleLikePainting(painting.id)"
+            />
+            <div v-if="painting.likers" class="font-size:24px">
+              {{ painting.likers.length }}
+            </div>
+          </div>
         </div>
       </template>
     </div>
@@ -19,28 +36,34 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import BaseSpinner from '../components/BaseSpinner.vue';
 import ImageModal from '../components/ImageModal.vue';
 import { where, orderBy } from 'firebase/firestore';
-import { apiGetPaintingList } from '@/api/painting';
+import { apiGetPaintingList, apiGetPainting } from '@/api/painting';
+import { apiAddLike, apiRemoveLike } from '@/api/like';
+import IconButton from '@/components/IconButton.vue';
+import { useUserStore } from '@/stores/user';
+import type { createLikeData } from '@/api/like';
 
-// TODO: 定義 Painting 類型
-// type Painting {
-//   id: string;
-//   paintingUrl: string;
-//   pokemonName: string;
-//   userId: string;
-//   username: string;
-//   isShared?: boolean;
-//   created?: Date;
-// }
+type Painting = {
+  id: string;
+  paintingUrl: string;
+  pokemonName: string;
+  userId: string;
+  username: string;
+  isShared?: boolean;
+  created?: Date;
+  likers?: createLikeData[];
+};
 
-let paintingList = ref([]);
+const userStore = useUserStore();
+
+let paintingList = ref<Painting[]>([]);
 let isLoading = ref(false);
 let focusImageUrl = ref('');
-const imageModal = ref(null);
+const imageModal = ref<InstanceType<typeof ImageModal> | null>(null);
 
 /**
  * 取得公開繪畫列表
@@ -53,7 +76,7 @@ async function getPaintings() {
 
   const querySnapshot = await apiGetPaintingList(filter, sort);
 
-  let fbPaintings = [];
+  let fbPaintings: Painting[] = [];
 
   querySnapshot.forEach((doc) => {
     const painting = {
@@ -62,6 +85,8 @@ async function getPaintings() {
       pokemonName: doc.data().pokemonName,
       userId: doc.data().userId,
       username: doc.data().username,
+      likers: doc.data().likers || [],
+      created: new Date(doc.data().created.seconds * 1000),
     };
     fbPaintings.push(painting);
   });
@@ -74,9 +99,59 @@ async function getPaintings() {
  * 設定聚焦圖片並顯示彈窗
  * @param {string} url 繪畫圖片檔 url
  */
-function setFocusImage(url) {
+function setFocusImage(url: string) {
   focusImageUrl.value = url;
-  imageModal.value.showModal();
+  if (imageModal.value) {
+    imageModal.value.showModal();
+  }
+}
+
+/**
+ * 取得對繪畫的按讚狀態
+ */
+function getIsLiked(painting: Painting): boolean {
+  if (!painting.likers || !userStore.userId) {
+    return false;
+  }
+  return painting.likers.some((liker) => liker.userId === userStore.userId);
+}
+
+/**
+ * 對繪畫點讚或取消點讚
+ * @param {string} paintingId 繪畫 id
+ */
+async function toggleLikePainting(paintingId: string) {
+  if (
+    !paintingId ||
+    !userStore.email ||
+    !userStore.username ||
+    !userStore.userId
+  ) {
+    return;
+  }
+
+  const paintingSnap = await apiGetPainting(paintingId);
+  if (!paintingSnap.exists()) {
+    return;
+  }
+  const likers = paintingSnap.data().likers || [];
+  const isLiked = likers.some(
+    (liker: { userId: string }) => liker.userId === userStore.userId,
+  );
+  const updateData = {
+    userEmail: userStore.email,
+    username: userStore.username,
+    userId: userStore.userId,
+  };
+
+  // 如果沒按過讚就按讚，按過就取消讚
+  if (!isLiked) {
+    await apiAddLike(paintingId, updateData);
+    getPaintings();
+  } else {
+    await apiRemoveLike(paintingId, updateData);
+    getPaintings();
+  }
 }
 
 onMounted(() => {

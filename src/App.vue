@@ -46,6 +46,7 @@ userStore.autoLogin();
   --pokemon-blue: #386abb;
   --white: #ffffff;
   --black: #000000;
+  --like-fill: #ff0034;
 }
 
 body {

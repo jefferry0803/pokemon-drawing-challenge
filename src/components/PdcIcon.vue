@@ -5,25 +5,20 @@
     :class="[`color:$(${color})`, `font-size:${size}`]"
   />
 </template>
+
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 
-defineProps({
-  iconPrefix: {
-    type: String,
-    default: 'material-symbols',
-  },
-  icon: {
-    type: String,
-    required: true,
-  },
-  color: {
-    type: String,
-    default: 'dark-grey-text',
-  },
-  size: {
-    type: [String, Number],
-    default: '32px',
-  },
+export type PdcIconProps = {
+  icon: string;
+  iconPrefix?: string;
+  color?: string;
+  size?: string | number;
+};
+
+withDefaults(defineProps<PdcIconProps>(), {
+  iconPrefix: 'material-symbols',
+  color: 'dark-grey-text',
+  size: '32px',
 });
 </script>
