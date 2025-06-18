@@ -34,6 +34,7 @@ userStore.autoLogin();
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&family=Roboto&display=swap');
+@import '@master/normal.css';
 
 :root {
   --dark-green: #163a38;
