@@ -35,11 +35,9 @@
         </div>
       </div>
       <div class="signupForm-buttons">
-        <BaseButton
-          :background-color="'#98A9E7'"
-          :text="'註冊'"
-          @click-callback="signup"
-        />
+        <BaseButton class="bg:#98A9E7" @click-callback="signup"
+          >註冊</BaseButton
+        >
       </div>
     </div>
     <BaseModal ref="successModal">

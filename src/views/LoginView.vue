@@ -28,11 +28,9 @@
         </div>
       </div>
       <div class="loginForm-buttons">
-        <BaseButton
-          :background-color="'#FDC795'"
-          :text="'登入'"
-          @click-callback="userLogin"
-        />
+        <BaseButton :background-color="'#FDC795'" @click-callback="userLogin"
+          >登入</BaseButton
+        >
         <router-link to="/signup" class="toSignup">
           沒有帳號嗎?<br />
           這裡註冊 →

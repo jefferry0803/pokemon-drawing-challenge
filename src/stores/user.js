@@ -9,6 +9,7 @@ import { auth } from '../firebase';
 
 export const useUserStore = defineStore('user', {
   state: () => ({
+    email: '',
     username: '訪客',
     userId: '',
     token: '',
@@ -38,6 +39,7 @@ export const useUserStore = defineStore('user', {
         const expiresIn = +res._tokenResponse.expiresIn * 1000;
         const expirationDate = new Date().getTime() + expiresIn;
 
+        localStorage.setItem('email', email);
         localStorage.setItem('username', username);
         localStorage.setItem('userId', res._tokenResponse.localId);
         localStorage.setItem('token', res._tokenResponse.idToken);
@@ -48,6 +50,7 @@ export const useUserStore = defineStore('user', {
         }, expiresIn);
 
         this.setUser(
+          email,
           username,
           res._tokenResponse.localId,
           res._tokenResponse.idToken,
@@ -58,6 +61,7 @@ export const useUserStore = defineStore('user', {
      * 自動登入
      */
     autoLogin() {
+      const email = localStorage.getItem('email');
       const username = localStorage.getItem('username');
       const userId = localStorage.getItem('userId');
       const token = localStorage.getItem('token');
@@ -73,11 +77,12 @@ export const useUserStore = defineStore('user', {
         this.logout();
       }, expiresIn);
 
-      if (username && userId && token) {
-        this.setUser(username, userId, token);
+      if (email && username && userId && token) {
+        this.setUser(email, username, userId, token);
       }
     },
-    setUser(username, userId, token) {
+    setUser(email, username, userId, token) {
+      this.email = email;
       this.username = username;
       this.userId = userId;
       this.token = token;
@@ -87,6 +92,7 @@ export const useUserStore = defineStore('user', {
      */
     logout() {
       signOut(auth).then(() => {
+        localStorage.removeItem('email');
         localStorage.removeItem('username');
         localStorage.removeItem('userId');
         localStorage.removeItem('token');
