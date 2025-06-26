@@ -34,6 +34,8 @@ userStore.autoLogin();
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&family=Roboto&display=swap');
+@import '@master/normal.css';
+@import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 :root {
   --dark-green: #163a38;
@@ -45,6 +47,8 @@ userStore.autoLogin();
   --pokemon-blue: #386abb;
   --white: #ffffff;
   --black: #000000;
+  --like-fill: #ff0034;
+  --grey: #808080;
 }
 
 body {
