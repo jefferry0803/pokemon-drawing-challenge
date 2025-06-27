@@ -135,7 +135,7 @@ async function timesUp() {
   ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
   pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
 
-  if (userStore.token) {
+  if (userStore.isLogin) {
     isSavingResult.value = true;
     const response = await saveResult();
     isSavingResult.value = false;
