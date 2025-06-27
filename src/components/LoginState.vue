@@ -4,13 +4,19 @@
   >
     <span
       class="d:none"
-      :class="{ 'd:none': !userStore.token, 'd:inline@sm': userStore.token }"
+      :class="{
+        'd:none': !userStore.isLogin,
+        'd:inline@sm': userStore.isLogin,
+      }"
       >以</span
     >
     {{ loginStateDisplay }}
     <span
       class="d:none"
-      :class="{ 'd:none': !userStore.token, 'd:inline@sm': userStore.token }"
+      :class="{
+        'd:none': !userStore.isLogin,
+        'd:inline@sm': userStore.isLogin,
+      }"
       >登入中</span
     >
   </div>
@@ -30,6 +36,6 @@ defineProps({
 const userStore = useUserStore();
 
 const loginStateDisplay = computed(() => {
-  return userStore.token ? userStore.username : '未登入';
+  return userStore.isLogin ? userStore.username : '未登入';
 });
 </script>

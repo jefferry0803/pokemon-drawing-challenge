@@ -43,7 +43,7 @@
               <img class="w:100%" :src="pokemonDrawUrl" alt="" />
             </div>
           </div>
-          <p v-if="!userStore.token" class="text-center mt-3 mb-0">
+          <p v-if="!userStore.isLogin" class="text-center mt-3 mb-0">
             您目前沒有登入，畫作將不會保存，要不要考慮
             <router-link to="/login"> 登入 </router-link>
             或是
@@ -77,7 +77,7 @@
             class="btns-container d:flex flex:wrap justify-content:end gap:1rem"
           >
             <button
-              v-if="userStore.token"
+              v-if="userStore.isLogin"
               type="button"
               class="btn btn-lg btn-primary"
               :disabled="isShared"
@@ -90,7 +90,7 @@
               >
             </button>
             <button
-              v-if="userStore.token"
+              v-if="userStore.isLogin"
               type="button"
               class="btn btn-lg btn-primary"
             >

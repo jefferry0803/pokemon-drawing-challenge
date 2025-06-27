@@ -32,7 +32,7 @@
           </div>
           <!-- 按讚區(登入才顯示) -->
           <div
-            v-if="userStore.token"
+            v-if="userStore.isLogin"
             class="position:absolute bottom:10px left:10px d:flex align-items:center gap:4px"
           >
             <IconButton

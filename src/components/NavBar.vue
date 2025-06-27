@@ -34,13 +34,16 @@ const routes = computed(() => {
     if (route.name === 'home' || route.name === 'login') return false;
 
     // 如果路由需要認證且用戶未登入，則不顯示
-    if (route.meta?.requiresAuth && !userStore.token) return false;
+    if (route.meta?.requiresAuth && !userStore.isLogin) return false;
+
+    // 登入時隱藏註冊頁
+    if (route.name === 'signup' && userStore.isLogin) return false;
 
     return true;
   });
 });
 
 const logInOutBtn = computed(() => {
-  return userStore.token ? '登出' : '登入';
+  return userStore.isLogin ? '登出' : '登入';
 });
 </script>

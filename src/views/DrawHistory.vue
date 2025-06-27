@@ -57,7 +57,8 @@
               刪除
             </BaseButton>
             <BaseButton
-              class="p:0.25rem|0.5rem.base-button p:0.5rem|1rem.base-button@sm d:none:hover_span content:'取消分享':hover::before"
+              :class="[paintingMap.get(item.id)?.isShared! && 'shared']"
+              class="p:0.25rem|0.5rem.base-button p:0.5rem|1rem.base-button@sm d:none.shared:hover_span content:'取消分享'.shared:hover::before"
               :border="false"
               :background-color="
                 paintingMap.get(item.id)?.isShared
