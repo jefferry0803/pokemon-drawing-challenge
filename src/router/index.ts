@@ -40,6 +40,18 @@ const router = createRouter({
       component: () => import('../views/PublicGallery.vue'),
       meta: { requiresAuth: false, title: '公共畫廊' },
     },
+    // {
+    //   path: '/users',
+    //   name: 'users',
+    //   component: () => import('../views/dev/UserList.vue'),
+    //   meta: { requiresAuth: false, title: '使用者' },
+    // },
+    // {
+    //   path: '/script',
+    //   name: 'script',
+    //   component: () => import('../views/dev/LikerCountScript.vue'),
+    //   meta: { requiresAuth: false, title: '測試' },
+    // },
   ],
 });
 
