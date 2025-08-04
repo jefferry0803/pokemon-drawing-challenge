@@ -35,19 +35,19 @@
         </div>
       </div>
       <div class="signupForm-buttons">
-        <BaseButton class="bg:#98A9E7" @click-callback="signup"
+        <BaseButton class="bg:#98A9E7.base-button" @click="signup"
           >註冊</BaseButton
         >
       </div>
     </div>
     <BaseModal ref="successModal">
       <template #title> 註冊成功 </template>
-      <template #content> 點選確認返回登入頁 </template>
+      <template #content> 點選確認前往繪畫頁 </template>
       <template #footer-buttons>
         <button
           type="button"
           class="btn btn-lg green-btn"
-          @click="router.push({ path: '/login' })"
+          @click="router.push({ path: '/pokedraw' })"
         >
           確認
         </button>
@@ -64,6 +64,7 @@ import BaseSpinner from '../components/BaseSpinner.vue';
 import { useUserStore } from '../stores/user';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
+import { apiAddUser } from '@/api/user';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -87,7 +88,13 @@ function signup() {
       isLoading.value = true;
       userStore
         .signup(email.value, password.value)
-        .then(() => {
+        .then(async (res) => {
+          // 註冊成功後，新增使用者資料到 Firestore
+          await apiAddUser(res.user.uid, {
+            email: email.value,
+            username: email.value.split('@')[0],
+          });
+
           isLoading.value = false;
           successModal.value.showModal();
           isSignupErrMsgShow.value = false;

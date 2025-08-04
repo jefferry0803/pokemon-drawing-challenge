@@ -13,10 +13,12 @@ export type createLikeData = {
 async function apiAddLike(
   paintingId: string,
   data: createLikeData,
+  currentLikesCount: number,
 ): Promise<void> {
   const paintingRef = doc(db, 'draw-history', paintingId);
   return await updateDoc(paintingRef, {
     likers: arrayUnion(data),
+    likesCount: currentLikesCount + 1,
   });
 }
 /**
@@ -25,10 +27,12 @@ async function apiAddLike(
 async function apiRemoveLike(
   paintingId: string,
   data: createLikeData,
+  currentLikesCount: number,
 ): Promise<void> {
   const paintingRef = doc(db, 'draw-history', paintingId);
-  return await updateDoc(paintingRef, {
+  await updateDoc(paintingRef, {
     likers: arrayRemove(data),
+    likesCount: currentLikesCount - 1,
   });
 }
 

@@ -17,34 +17,67 @@
         </div>
       </template>
     </div>
-    <div class="sidebar" :class="{ hide: !isSidebarShow }">
+    <div class="sidebar d:flex gap:16px" :class="{ hide: !isSidebarShow }">
       <div class="sidebar-hideBtn" @click="toggleSidebar">
         {{ hideSidebarBtn }}
       </div>
-      <div
-        v-for="color in paletteColors"
-        :key="color"
-        class="button"
-        :style="{ background: color }"
-        @click="setColor(color)"
-      >
-        <span v-show="currentColor === color" class="color-selected">✔</span>
-      </div>
-      <div class="button button-function" @click="undo">
-        <PdcIcon icon="undo-rounded" />
-      </div>
-      <div class="button button-function" @click="redo">
-        <PdcIcon icon="redo-rounded" />
-      </div>
-      <div
-        :class="{ 'eraser-selected': currentColor === '#ffffff' }"
-        class="button button-function"
-        @click="setColor('#ffffff')"
-      >
-        <PdcIcon icon="ink-eraser-rounded" />
-      </div>
-      <div class="button button-function" @click="allClear">
-        <PdcIcon icon="trash-can" icon-prefix="mdi" />
+      <PdcSlider v-model="currentLineWidth" orientation="vertical">
+        <template #prepend>
+          <div>100</div>
+          <div class="w:25px h:25px bg:$(white) r:50% mb:8px"></div>
+        </template>
+        <template #append>
+          <div class="w:10px h:10px bg:$(white) r:50% mt:8px"></div>
+          <div>1</div>
+        </template>
+      </PdcSlider>
+      <div class="d:grid grid-template-columns:50px|50px gap:1rem">
+        <div
+          v-for="color in paletteColors"
+          :key="color"
+          class="button"
+          :style="{ background: color }"
+          @click="setColor(color)"
+        >
+          <span
+            v-show="
+              currentColor === color &&
+              (currentTool === TOOLS.BRUSH || currentTool === TOOLS.FILL)
+            "
+            class="color-selected"
+            >✔</span
+          >
+        </div>
+        <div class="button button-function" @click="undo">
+          <PdcIcon icon="undo-rounded" />
+        </div>
+        <div class="button button-function" @click="redo">
+          <PdcIcon icon="redo-rounded" />
+        </div>
+        <div
+          class="button button-function"
+          :class="{ 'tool-selected': currentTool === TOOLS.BRUSH }"
+          @click="setTool(TOOLS.BRUSH)"
+        >
+          <PdcIcon icon="brush" icon-prefix="mdi" />
+        </div>
+        <div
+          class="button button-function"
+          :class="{ 'tool-selected': currentTool === TOOLS.FILL }"
+          @click="setTool(TOOLS.FILL)"
+        >
+          <PdcIcon icon="paint-bucket" icon-prefix="mdi" />
+        </div>
+        <div
+          :class="{ 'tool-selected': currentTool === TOOLS.ERASER }"
+          class="button button-function"
+          @click="setTool(TOOLS.ERASER)"
+        >
+          <PdcIcon icon="ink-eraser-rounded" />
+        </div>
+        <div class="button button-function" @click="allClear">
+          <PdcIcon icon="trash-can" icon-prefix="mdi" />
+        </div>
       </div>
     </div>
     <div ref="canvasContainer" class="canvas-container">
@@ -91,17 +124,16 @@ import BaseModal from '../components/BaseModal.vue';
 import BaseSpinner from '../components/BaseSpinner.vue';
 import ResultModal from '../components/ResultModal.vue';
 import LoadingDots from '../components/LoadingDots.vue';
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import useCanvas from '../composables/canvas.js';
-import usePokeApi from '../composables/pokeApi.js';
 import { useUserStore } from '../stores/user';
 import router from '../router';
 import { apiCreatePainting } from '@/api/painting';
 import PdcIcon from '@/components/PdcIcon.vue';
+import PdcSlider from '@/components/PdcSlider.vue';
+import { apiGetPokemon } from '@/api/pokemon';
 
 const { paletteColors } = useCanvas();
-const { getLanguageContent, getColorChineseName } = usePokeApi();
 const userStore = useUserStore();
 
 // 遊戲機制相關
@@ -165,6 +197,8 @@ function reset() {
 function saveResult() {
   return apiCreatePainting({
     paintingUrl: pokemonDrawUrl.value,
+    pokemonId: pokemonId.value.toString(),
+    pokemonIdNumber: parseInt(pokemonId.value, 10),
     pokemonName: pokemonName.value,
     userId: userStore.userId,
     username: userStore.username,
@@ -184,26 +218,21 @@ let isPokemonLoading = ref(false);
 /**
  * 取得寶可夢資料
  */
-function getPokemon() {
+async function getPokemon() {
   isPokemonLoading.value = true;
   startModal.value.hideModal();
-  pokemonId.value = getRandomNum(905);
-  axios
-    .get('https://pokeapi.co/api/v2/pokemon-species/' + pokemonId.value)
-    .then((res) => {
-      const names = res.data.names;
-      const descs = res.data.flavor_text_entries;
-      const color = res.data.color.name;
+  pokemonId.value = getRandomNum(905).toString();
 
-      pokemonName.value = getLanguageContent(names, 'zh-Hant').name;
-      pokemonColor.value = getColorChineseName(color);
-      const chDesc = getLanguageContent(descs, 'zh-Hant').flavor_text;
-      pokemonDesc.value = chDesc ? chDesc.replace(/\s+/g, '') : '';
-      pokemonImgUrl.value = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId.value}.png`;
+  const databasePokemonId = pokemonId.value.padStart(4, '0');
+  const pokemonSnap = await apiGetPokemon(databasePokemonId);
+  const data = pokemonSnap.data();
 
-      isPokemonLoading.value = false;
-      startTimer();
-    });
+  pokemonName.value = data.chName;
+  pokemonColor.value = data.color;
+  pokemonDesc.value = data.description;
+  pokemonImgUrl.value = `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pokemonId.value.padStart(3, '0')}.png`;
+  isPokemonLoading.value = false;
+  startTimer();
 }
 /**
  * 依照範圍取得隨機數
@@ -225,11 +254,19 @@ let undoList = ref([]);
 let redoList = ref([]);
 let isSidebarShow = ref(true);
 let isTopicCollapse = ref(false);
+const currentLineWidth = ref([10]);
+const TOOLS = {
+  BRUSH: 'brush',
+  FILL: 'fill',
+  ERASER: 'eraser',
+};
+
+const currentTool = ref(TOOLS.BRUSH);
 
 function initCanvas() {
   ctx.value = pokeCanvas.value.getContext('2d');
-  ctx.value.strokeStyle = currentColor;
-  ctx.value.lineWidth = 10;
+  ctx.value.strokeStyle = currentColor.value;
+  ctx.value.lineWidth = currentLineWidth.value[0];
   ctx.value.lineJoin = 'round';
   ctx.value.lineCap = 'round';
 }
@@ -238,6 +275,11 @@ function resizeCanvas() {
   pokeCanvas.value.height = window.innerHeight * 0.7;
 }
 function handleMouseDown(e) {
+  if (currentTool.value === TOOLS.FILL) {
+    floodFill(e.offsetX, e.offsetY, currentColor.value);
+    return;
+  }
+
   isMouseDown.value = true;
   lastX = e.offsetX;
   lastY = e.offsetY;
@@ -308,13 +350,25 @@ function allClear() {
   saveHistory();
 }
 function setColor(color) {
+  if (currentTool.value !== TOOLS.BRUSH && currentTool.value !== TOOLS.FILL)
+    return;
   currentColor.value = color;
   ctx.value.strokeStyle = color;
-
-  if (color === '#ffffff') {
+}
+/**
+ * 設置目前工具
+ * @param tool {string} 畫筆工具類型
+ */
+function setTool(tool) {
+  currentTool.value = tool;
+  if (tool === TOOLS.ERASER) {
+    currentLineWidth.value = [50];
     ctx.value.lineWidth = 50;
+    ctx.value.strokeStyle = '#ffffff';
   } else {
+    currentLineWidth.value = [10];
     ctx.value.lineWidth = 10;
+    ctx.value.strokeStyle = currentColor.value;
   }
 }
 function toggleSidebar() {
@@ -329,6 +383,108 @@ const hideSidebarBtn = computed(() => {
 const topicCollapseBtn = computed(() => {
   return isTopicCollapse.value ? '▼' : '▲';
 });
+/**
+ * 油漆桶填充
+ * @param {number}startX
+ * @param {number} startY
+ * @param {string} fillColor
+ */
+function floodFill(startX, startY, fillColor) {
+  const imageData = ctx.value.getImageData(
+    0,
+    0,
+    pokeCanvas.value.width,
+    pokeCanvas.value.height,
+  );
+  const pixels = imageData.data;
+
+  // 獲取起始點的顏色
+  const startPos = (startY * pokeCanvas.value.width + startX) * 4;
+  const startR = pixels[startPos];
+  const startG = pixels[startPos + 1];
+  const startB = pixels[startPos + 2];
+  const startA = pixels[startPos + 3];
+
+  // 轉換目標填充顏色
+  const fillRGB = hexToRgb(fillColor);
+  if (!fillRGB) return;
+
+  // 使用隊列來實現填充
+  const queue = [[startX, startY]];
+  const visited = new Set();
+
+  /**
+   *
+   * @param {number} x x 座標
+   * @param {number} y y 座標
+   */
+  function checkPixel(x, y) {
+    if (
+      x < 0 ||
+      x >= pokeCanvas.value.width ||
+      y < 0 ||
+      y >= pokeCanvas.value.height
+    ) {
+      return false;
+    }
+
+    const pos = (y * pokeCanvas.value.width + x) * 4;
+    const key = `${x},${y}`;
+    if (visited.has(key)) return false;
+
+    // 檢查顏色是否相近（允許一些誤差）
+    const isSimilar =
+      Math.abs(pixels[pos] - startR) < 10 &&
+      Math.abs(pixels[pos + 1] - startG) < 10 &&
+      Math.abs(pixels[pos + 2] - startB) < 10 &&
+      Math.abs(pixels[pos + 3] - startA) < 10;
+
+    return isSimilar;
+  }
+
+  while (queue.length) {
+    const [x, y] = queue.shift();
+    const key = `${x},${y}`;
+    if (visited.has(key)) continue;
+
+    visited.add(key);
+    const pos = (y * pokeCanvas.value.width + x) * 4;
+
+    // 設置新顏色
+    pixels[pos] = fillRGB.r;
+    pixels[pos + 1] = fillRGB.g;
+    pixels[pos + 2] = fillRGB.b;
+    pixels[pos + 3] = 255;
+
+    // 檢查四個方向
+    if (checkPixel(x + 1, y)) queue.push([x + 1, y]);
+    if (checkPixel(x - 1, y)) queue.push([x - 1, y]);
+    if (checkPixel(x, y + 1)) queue.push([x, y + 1]);
+    if (checkPixel(x, y - 1)) queue.push([x, y - 1]);
+  }
+
+  ctx.value.putImageData(imageData, 0, 0);
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+}
+
+watch(
+  () => currentLineWidth.value,
+  (newValue) => {
+    if (ctx.value) {
+      ctx.value.lineWidth = newValue[0];
+    }
+  },
+);
 
 window.addEventListener('resize', resizeCanvas);
 onMounted(() => {
@@ -379,11 +535,8 @@ onUnmounted(() => {
 .sidebar {
   position: absolute;
   right: 20px;
-  top: 50%;
+  top: 48%;
   transform: translateY(-50%);
-  display: grid;
-  grid-template-columns: 50px 50px;
-  gap: 1rem;
   background: var(--sand);
   padding: 1rem;
   border-radius: 20px;
@@ -433,7 +586,7 @@ onUnmounted(() => {
   color: #fff;
   font-size: 1.5rem;
 }
-.eraser-selected {
+.tool-selected {
   border: 2px solid #008000;
 }
 .timeBar-outer {
