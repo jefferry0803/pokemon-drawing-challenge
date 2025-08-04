@@ -33,7 +33,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--pokemon-blue);
+  background: var(--black);
   margin: -4px 0 0 -4px;
 }
 
