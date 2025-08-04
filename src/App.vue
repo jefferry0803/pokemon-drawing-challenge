@@ -49,6 +49,13 @@ userStore.autoLogin();
   --black: #000000;
   --like-fill: #ff0034;
   --grey: #808080;
+  --bg-disabled: #dddddd;
+  --border-disabled: #8d8d8d;
+  --input-border: #dcdfe6;
+  --input-border-focus: #409eff;
+  --input-border-disabled: #e4e7ed;
+  --input-bg-disabled: #f5f7fa;
+  --input-fg-disabled: #a8abb2;
 }
 
 body {
