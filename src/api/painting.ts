@@ -35,7 +35,7 @@ async function apiGetPainting(paintingId: string) {
  * 向 firestore 取得繪畫列表
  */
 async function apiGetPaintingList(
-  filter: QueryFieldFilterConstraint,
+  filter: QueryFieldFilterConstraint[],
   sort: QueryOrderByConstraint,
   perPage: number,
   lastVisiblePainting: DocumentSnapshot | null = null,
@@ -43,7 +43,7 @@ async function apiGetPaintingList(
   const drawHistoryRef = collection(db, 'draw-history');
   const q = query(
     drawHistoryRef,
-    filter,
+    ...filter,
     sort,
     limit(perPage),
     ...(lastVisiblePainting ? [startAfter(lastVisiblePainting)] : []),
@@ -54,7 +54,9 @@ async function apiGetPaintingList(
 /**
  * 取得繪畫總數
  */
-async function apiGetPaintingCount(filter: QueryFieldFilterConstraint): Promise<
+async function apiGetPaintingCount(
+  filter: QueryFieldFilterConstraint[],
+): Promise<
   AggregateQuerySnapshot<
     {
       count: AggregateField<number>;
@@ -64,7 +66,7 @@ async function apiGetPaintingCount(filter: QueryFieldFilterConstraint): Promise<
   >
 > {
   const drawHistoryRef = collection(db, 'draw-history');
-  const q = query(drawHistoryRef, filter);
+  const q = query(drawHistoryRef, ...filter);
   return await getCountFromServer(q);
 }
 

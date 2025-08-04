@@ -10,8 +10,9 @@ import type {
 } from 'firebase/firestore';
 
 export function usePaintingList(
-  filter: QueryFieldFilterConstraint,
-  sort: QueryOrderByConstraint,
+  virtualScrollerRefName: string,
+  initFilter: QueryFieldFilterConstraint[],
+  initSort: QueryOrderByConstraint,
 ) {
   // 儲存繪畫資料的 Map
   const paintingMap = ref(new Map<string, Painting>());
@@ -27,13 +28,18 @@ export function usePaintingList(
   // 是否正在載入資料
   const isLoading = ref(false);
 
+  // 目前篩選條件
+  const currentFilter = ref<QueryFieldFilterConstraint[]>(initFilter);
+  // 目前排序條件
+  const currentSort = ref<QueryOrderByConstraint>(initSort);
+
   // 虛擬滾動元件的欄數
   const gridItems = ref(2);
   // 繪畫寬度
   const itemSecondarySize = ref(0);
   // 虛擬滾動元件 DOM 元素
   const virtualScrollerRef = useTemplateRef<HTMLElement | null>(
-    'virtualScrollerRef',
+    virtualScrollerRefName,
   );
 
   /**
@@ -64,7 +70,7 @@ export function usePaintingList(
    * 取得繪畫總數
    */
   async function getTotalPaintings() {
-    const countSnapshot = await apiGetPaintingCount(filter);
+    const countSnapshot = await apiGetPaintingCount(currentFilter.value);
     paintingCount.value = countSnapshot.data().count;
   }
 
@@ -74,8 +80,8 @@ export function usePaintingList(
   async function getPaintings() {
     isLoading.value = true;
     const querySnapshot = await apiGetPaintingList(
-      filter,
-      sort,
+      currentFilter.value,
+      currentSort.value,
       10,
       lastVisiblePainting.value,
     );
@@ -91,6 +97,7 @@ export function usePaintingList(
         username: doc.data().username,
         isShared: doc.data().isShared,
         likers: doc.data().likers || [],
+        likesCount: doc.data().likesCount || 0,
         created: new Date(doc.data().created.seconds * 1000),
       };
       paintingMap.value.set(painting.id, painting);
@@ -103,6 +110,31 @@ export function usePaintingList(
     paintingOrder.value = [...paintingOrder.value];
 
     isLoading.value = false;
+  }
+  /**
+   * 更新目前篩選條件
+   */
+  function updateFilter(filter: QueryFieldFilterConstraint[]) {
+    currentFilter.value = filter;
+    refreshPaintingList();
+  }
+  /**
+   * 更新目前排序條件
+   */
+  function updateSort(sort: QueryOrderByConstraint) {
+    currentSort.value = sort;
+    refreshPaintingList();
+  }
+  /**
+   * 刷新繪畫列表
+   */
+  function refreshPaintingList() {
+    paintingMap.value.clear();
+    paintingOrder.value = [];
+    paintingCount.value = 0;
+    lastVisiblePainting.value = null;
+    getTotalPaintings();
+    getPaintings();
   }
 
   return {
@@ -118,5 +150,7 @@ export function usePaintingList(
     handleVirtualScrollerResize,
     getTotalPaintings,
     getPaintings,
+    updateFilter,
+    updateSort,
   };
 }
