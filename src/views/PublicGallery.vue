@@ -1,13 +1,9 @@
 <template>
   <div
-    class="gallery-container container b:3px|solid|$(black) box-shadow:0px|4px|15px|rgb(23|44|120|/|20%) r:0|49px|49px|49px bg:$(sand) h:75vh pt:1rem pb:1rem position:relative d:flex flex-direction:column"
+    class="gallery-container container b:3px|solid|$(black) box-shadow:0px|4px|15px|rgb(23|44|120|/|20%) r:0|49px|49px|49px bg:$(sand) h:75vh pt:1rem pb:1rem d:flex flex-direction:column"
   >
-    <BaseSpinner
-      v-if="isLoading && !paintingOrder.length"
-      class="spinner position:absolute top:50% left:50% transform:translate(-50%,-50%)"
-    />
     <h1 class="gallery-title text-align:center">公共畫廊</h1>
-    <div class="px:32px d:flex gap:16px">
+    <div class="px:16px pb:8px d:flex gap:16px">
       <PdcFilter
         v-model="selectedUserIds"
         title="作者"
@@ -33,65 +29,74 @@
         ]"
       />
     </div>
-    <RecycleScroller
-      v-if="paintingOrder.length"
-      ref="virtualScrollerRef"
-      v-slot="{ item }"
-      class="paintings-container overflow:auto pr:1.5rem"
-      :items="paintingOrder"
-      :item-size="482"
-      :item-secondary-size="itemSecondarySize"
-      :grid-items="gridItems"
-      :buffer="900"
-      @scroll-end="handleScrollToEnd"
-      @resize="handleVirtualScrollerResize"
-    >
-      <div class="p:1rem">
-        <div
-          class="painting-wrapper position:relative border:3px|solid|$(black) r:25px height:450px overflow:hidden"
-        >
-          <!-- 繪畫標題 -->
+    <!-- Loading Spinner -->
+    <div class="d:flex justify-content:center align-items:center flex:1">
+      <BaseSpinner v-if="isLoading && !paintingOrder.length" />
+    </div>
+    <Transition name="paintingList">
+      <RecycleScroller
+        v-if="paintingOrder.length"
+        ref="virtualScrollerRef"
+        v-slot="{ item }"
+        class="paintings-container overflow:auto pr:1.5rem"
+        :items="paintingOrder"
+        :item-size="482"
+        :item-secondary-size="itemSecondarySize"
+        :grid-items="gridItems"
+        :buffer="900"
+        @scroll-end="handleScrollToEnd"
+        @resize="handleVirtualScrollerResize"
+      >
+        <div class="p:1rem">
           <div
-            class="painting-title position:absolute top:10px left:50% transform:translateX(-50%) bg:$(dark-green) color:$(white) r:15px font-size:1rem font-size:1.5rem@sm p:0.25rem|1rem white-space:nowrap"
+            class="painting-wrapper position:relative border:3px|solid|$(black) r:25px height:450px overflow:hidden"
           >
-            {{ paintingMap.get(item.id)?.username }} 畫的
-            {{ paintingMap.get(item.id)?.pokemonName }}
-          </div>
-          <!-- 按讚區(登入才顯示) -->
-          <div
-            v-if="userStore.isLogin"
-            class="position:absolute bottom:10px left:10px d:flex align-items:center gap:4px"
-          >
-            <IconButton
-              v-if="paintingMap.get(item.id)"
-              class="painting-like-btn"
-              :icon="
-                getIsLiked(paintingMap.get(item.id)!)
-                  ? 'heart'
-                  : 'heart-outline'
-              "
-              icon-prefix="mdi"
-              :size="48"
-              :color="getIsLiked(paintingMap.get(item.id)!) ? 'like-fill' : ''"
-              @click="toggleLikePainting(item.id)"
-            />
-            <!--按讚數 -->
-            <div class="font-size:24px">
-              {{ paintingMap.get(item.id)?.likesCount ?? 0 }}
+            <!-- 繪畫標題 -->
+            <div
+              class="painting-title position:absolute top:10px left:50% transform:translateX(-50%) bg:$(dark-green) color:$(white) r:15px font-size:1rem font-size:1.5rem@sm p:0.25rem|1rem white-space:nowrap"
+            >
+              {{ paintingMap.get(item.id)?.username }} 畫的
+              {{ paintingMap.get(item.id)?.pokemonName }}
             </div>
+            <!-- 按讚區(登入才顯示) -->
+            <div
+              v-if="userStore.isLogin"
+              class="position:absolute bottom:10px left:10px d:flex align-items:center gap:4px"
+            >
+              <IconButton
+                v-if="paintingMap.get(item.id)"
+                class="painting-like-btn"
+                :icon="
+                  getIsLiked(paintingMap.get(item.id)!)
+                    ? 'heart'
+                    : 'heart-outline'
+                "
+                icon-prefix="mdi"
+                :size="48"
+                :color="
+                  getIsLiked(paintingMap.get(item.id)!) ? 'like-fill' : ''
+                "
+                @click="toggleLikePainting(item.id)"
+              />
+              <!--按讚數 -->
+              <div class="font-size:24px">
+                {{ paintingMap.get(item.id)?.likesCount ?? 0 }}
+              </div>
+            </div>
+            <!-- 圖片 -->
+            <div
+              v-if="paintingMap.get(item.id)"
+              :style="{
+                backgroundImage: `url(${paintingMap.get(item.id)?.paintingUrl})`,
+              }"
+              class="painting h:100% background-size:cover background-position:center cursor:zoom-in"
+              @click="setFocusImage(paintingMap.get(item.id)?.paintingUrl!)"
+            ></div>
           </div>
-          <!-- 圖片 -->
-          <div
-            v-if="paintingMap.get(item.id)"
-            :style="{
-              backgroundImage: `url(${paintingMap.get(item.id)?.paintingUrl})`,
-            }"
-            class="painting h:100% background-size:cover background-position:center cursor:zoom-in"
-            @click="setFocusImage(paintingMap.get(item.id)?.paintingUrl!)"
-          ></div>
         </div>
-      </div>
-    </RecycleScroller>
+      </RecycleScroller>
+    </Transition>
+    <!-- 無資料顯示 -->
     <div
       v-if="!isLoading && !paintingOrder.length"
       class="d:flex justify-content:center align-items:center flex:1 font-size:32px color:$(grey)"

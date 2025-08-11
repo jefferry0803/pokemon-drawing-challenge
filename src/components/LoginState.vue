@@ -1,6 +1,6 @@
 <template>
   <div
-    class="loginState position:fixed top:10px right:10px font:1.25rem z:2 b:3px|solid|$(black) r:15px bg:$(pokemon-yellow) p:0.5rem box-shadow:0px|4px|15px|rgb(23|44|120/20%) {top:50px;right:50px}@sm"
+    class="loginState position:fixed top:10px right:10px font:1.25rem b:3px|solid|$(black) r:15px bg:$(pokemon-yellow) p:0.5rem box-shadow:0px|4px|15px|rgb(23|44|120/20%) {top:50px;right:50px}@sm"
   >
     <span
       class="d:none"

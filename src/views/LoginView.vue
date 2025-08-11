@@ -1,5 +1,5 @@
 <template>
-  <div class="container login-container rel">
+  <div class="container login-container">
     <div class="loginForm-container">
       <h1>登入</h1>
       <div class="loginForm-inputGroups my-3">
