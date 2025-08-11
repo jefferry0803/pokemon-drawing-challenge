@@ -134,8 +134,10 @@ import PdcFilter from '@/components/PdcFilter.vue';
 import SortControl from '@/components/SortControl.vue';
 import { apiGetPokemonList } from '@/api/pokemon';
 import { useDebounceFn, watchDebounced } from '@vueuse/core';
+import { useDialog } from '@/composables/useDialog';
 
 const userStore = useUserStore();
+const { showDialog } = useDialog();
 
 const {
   paintingMap,
@@ -175,9 +177,19 @@ const currentSort = ref<SortState>({
  * @param {string} id 繪畫 id
  */
 async function deletePainting(id: string) {
+  showDialog({
+    title: '確認刪除',
+    content: '確定要刪除這個項目嗎？此操作無法復原。',
+    confirmText: '刪除',
+    cancelText: '取消',
+    async onConfirm() {
   await apiDeletePainting(id);
   paintingMap.value.delete(id);
-  paintingOrder.value = paintingOrder.value.filter((item) => item.id !== id);
+      paintingOrder.value = paintingOrder.value.filter(
+        (item) => item.id !== id,
+      );
+    },
+  });
 }
 
 /**

@@ -5,6 +5,7 @@
       <PdcLogo />
       <NavBar />
       <RouterView />
+      <PdcDialog />
       <div class="background-reference">
         Image by
         <a
@@ -22,6 +23,10 @@ import LoginState from './components/LoginState.vue';
 import NavBar from './components/NavBar.vue';
 import { useUserStore } from './stores/user';
 import '@master/css';
+import { provideDialog } from '@/composables/useDialog';
+import PdcDialog from '@/components/PdcDialog.vue';
+
+provideDialog();
 
 const userStore = useUserStore();
 
@@ -56,6 +61,7 @@ userStore.autoLogin();
   --input-border-disabled: #e4e7ed;
   --input-bg-disabled: #f5f7fa;
   --input-fg-disabled: #a8abb2;
+  --overlay-bg: #000000b3;
 }
 
 body {
