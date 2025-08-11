@@ -1,5 +1,5 @@
 <template>
-  <div class="container signup-container rel">
+  <div class="container signup-container">
     <div class="toLogin-container">
       <router-link class="toLogin" to="/login"> ← 返回登入頁 </router-link>
     </div>

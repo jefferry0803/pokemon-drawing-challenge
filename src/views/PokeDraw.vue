@@ -1,121 +1,127 @@
 <template>
-  <div class="pokedraw-container container rel">
-    <div class="topic">
-      <template v-if="isPokemonLoading">
-        <BaseSpinner />
-      </template>
-      <template v-else>
-        <h2 class="topic-pokemonName">題目: {{ pokemonName || '???' }}</h2>
-        <div class="topic-extraInfo" :class="{ myCollapse: isTopicCollapse }">
-          <p class="topic-description">
-            {{ pokemonDesc || '???' }}
-          </p>
-          <p class="topic-color">主色: {{ pokemonColor || '???' }}</p>
-        </div>
-        <div class="topic-collapseBtn" @click="toggleTopic">
-          {{ topicCollapseBtn }}
-        </div>
-      </template>
-    </div>
-    <div class="sidebar d:flex gap:16px" :class="{ hide: !isSidebarShow }">
-      <div class="sidebar-hideBtn" @click="toggleSidebar">
-        {{ hideSidebarBtn }}
+  <div class="pokedraw-container container">
+    <div class="position:relative">
+      <div class="topic">
+        <template v-if="isPokemonLoading">
+          <BaseSpinner />
+        </template>
+        <template v-else>
+          <h2 class="topic-pokemonName">題目: {{ pokemonName || '???' }}</h2>
+          <div class="topic-extraInfo" :class="{ myCollapse: isTopicCollapse }">
+            <p class="topic-description">
+              {{ pokemonDesc || '???' }}
+            </p>
+            <p class="topic-color">主色: {{ pokemonColor || '???' }}</p>
+          </div>
+          <div class="topic-collapseBtn" @click="toggleTopic">
+            {{ topicCollapseBtn }}
+          </div>
+        </template>
       </div>
-      <PdcSlider v-model="currentLineWidth" orientation="vertical">
-        <template #prepend>
-          <div>100</div>
-          <div class="w:25px h:25px bg:$(white) r:50% mb:8px"></div>
-        </template>
-        <template #append>
-          <div class="w:10px h:10px bg:$(white) r:50% mt:8px"></div>
-          <div>1</div>
-        </template>
-      </PdcSlider>
-      <div class="d:grid grid-template-columns:50px|50px gap:1rem">
-        <div
-          v-for="color in paletteColors"
-          :key="color"
-          class="button"
-          :style="{ background: color }"
-          @click="setColor(color)"
-        >
-          <span
-            v-show="
-              currentColor === color &&
-              (currentTool === TOOLS.BRUSH || currentTool === TOOLS.FILL)
-            "
-            class="color-selected"
-            >✔</span
+      <div class="sidebar d:flex gap:16px" :class="{ hide: !isSidebarShow }">
+        <div class="sidebar-hideBtn" @click="toggleSidebar">
+          {{ hideSidebarBtn }}
+        </div>
+        <PdcSlider v-model="currentLineWidth" orientation="vertical">
+          <template #prepend>
+            <div>100</div>
+            <div class="w:25px h:25px bg:$(white) r:50% mb:8px"></div>
+          </template>
+          <template #append>
+            <div class="w:10px h:10px bg:$(white) r:50% mt:8px"></div>
+            <div>1</div>
+          </template>
+        </PdcSlider>
+        <div class="d:grid grid-template-columns:50px|50px gap:1rem">
+          <div
+            v-for="color in paletteColors"
+            :key="color"
+            class="button"
+            :style="{ background: color }"
+            @click="setColor(color)"
           >
-        </div>
-        <div class="button button-function" @click="undo">
-          <PdcIcon icon="undo-rounded" />
-        </div>
-        <div class="button button-function" @click="redo">
-          <PdcIcon icon="redo-rounded" />
-        </div>
-        <div
-          class="button button-function"
-          :class="{ 'tool-selected': currentTool === TOOLS.BRUSH }"
-          @click="setTool(TOOLS.BRUSH)"
-        >
-          <PdcIcon icon="brush" icon-prefix="mdi" />
-        </div>
-        <div
-          class="button button-function"
-          :class="{ 'tool-selected': currentTool === TOOLS.FILL }"
-          @click="setTool(TOOLS.FILL)"
-        >
-          <PdcIcon icon="paint-bucket" icon-prefix="mdi" />
-        </div>
-        <div
-          :class="{ 'tool-selected': currentTool === TOOLS.ERASER }"
-          class="button button-function"
-          @click="setTool(TOOLS.ERASER)"
-        >
-          <PdcIcon icon="ink-eraser-rounded" />
-        </div>
-        <div class="button button-function" @click="allClear">
-          <PdcIcon icon="trash-can" icon-prefix="mdi" />
+            <span
+              v-show="
+                currentColor === color &&
+                (currentTool === TOOLS.BRUSH || currentTool === TOOLS.FILL)
+              "
+              class="color-selected"
+              >✔</span
+            >
+          </div>
+          <div class="button button-function" @click="undo">
+            <PdcIcon icon="undo-rounded" />
+          </div>
+          <div class="button button-function" @click="redo">
+            <PdcIcon icon="redo-rounded" />
+          </div>
+          <div
+            class="button button-function"
+            :class="{ 'tool-selected': currentTool === TOOLS.BRUSH }"
+            @click="setTool(TOOLS.BRUSH)"
+          >
+            <PdcIcon icon="brush" icon-prefix="mdi" />
+          </div>
+          <div
+            class="button button-function"
+            :class="{ 'tool-selected': currentTool === TOOLS.FILL }"
+            @click="setTool(TOOLS.FILL)"
+          >
+            <PdcIcon icon="paint-bucket" icon-prefix="mdi" />
+          </div>
+          <div
+            :class="{ 'tool-selected': currentTool === TOOLS.ERASER }"
+            class="button button-function"
+            @click="setTool(TOOLS.ERASER)"
+          >
+            <PdcIcon icon="ink-eraser-rounded" />
+          </div>
+          <div class="button button-function" @click="allClear">
+            <PdcIcon icon="trash-can" icon-prefix="mdi" />
+          </div>
         </div>
       </div>
-    </div>
-    <div ref="canvasContainer" class="canvas-container">
-      <canvas
-        ref="pokeCanvas"
-        class="pokeCanvas"
-        @touchmove.prevent
-        @pointerdown.prevent="handleMouseDown"
-        @pointermove.prevent="handleMouseMove"
-        @pointerup.prevent="handleMousUp"
+      <div ref="canvasContainer" class="canvas-container">
+        <canvas
+          ref="pokeCanvas"
+          class="pokeCanvas"
+          @touchmove.prevent
+          @pointerdown.prevent="handleMouseDown"
+          @pointermove.prevent="handleMouseMove"
+          @pointerup.prevent="handleMousUp"
+        />
+      </div>
+      <div class="timeBar-outer">
+        <div
+          :style="{ width: Math.floor((secondsLeft / 60) * 100) + '%' }"
+          class="timeBar-inner"
+        />
+      </div>
+      <BaseModal ref="startModal">
+        <template #title> 遊戲規則 </template>
+        <template #content>
+          系統會隨機產生一種寶可夢，請在限時1分鐘以內畫出來!
+        </template>
+        <template #footer-buttons>
+          <button
+            type="button"
+            class="btn btn-lg green-btn"
+            @click="getPokemon"
+          >
+            我了解了
+          </button>
+        </template>
+      </BaseModal>
+      <ResultModal
+        ref="resultModal"
+        :pokemon-img-url="pokemonImgUrl"
+        :pokemon-draw-url="pokemonDrawUrl"
+        :pokemon-name="pokemonName"
+        @reset="reset"
+        @to-draw-history="router.push({ path: '/history' })"
       />
+      <LoadingDots v-if="isSavingResult" :title="'結果儲存中'" />
     </div>
-    <div class="timeBar-outer">
-      <div
-        :style="{ width: Math.floor((secondsLeft / 60) * 100) + '%' }"
-        class="timeBar-inner"
-      />
-    </div>
-    <BaseModal ref="startModal">
-      <template #title> 遊戲規則 </template>
-      <template #content>
-        系統會隨機產生一種寶可夢，請在限時1分鐘以內畫出來!
-      </template>
-      <template #footer-buttons>
-        <button type="button" class="btn btn-lg green-btn" @click="getPokemon">
-          我了解了
-        </button>
-      </template>
-    </BaseModal>
-    <ResultModal
-      ref="resultModal"
-      :pokemon-img-url="pokemonImgUrl"
-      :pokemon-draw-url="pokemonDrawUrl"
-      :pokemon-name="pokemonName"
-      @reset="reset"
-      @to-draw-history="router.push({ path: '/history' })"
-    />
-    <LoadingDots v-if="isSavingResult" :title="'結果儲存中'" />
   </div>
 </template>
 

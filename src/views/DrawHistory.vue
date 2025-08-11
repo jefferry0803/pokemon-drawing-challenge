@@ -1,13 +1,9 @@
 <template>
   <div
-    class="drawHistory-container container b:3px|solid|$(black) box-shadow:0px|4px|15px|rgb(23|44|120|/|20%) r:0|49px|49px|49px bg:$(sand) h:75vh pt:1rem pb:1rem position:relative d:flex flex-direction:column"
+    class="drawHistory-container container b:3px|solid|$(black) box-shadow:0px|4px|15px|rgb(23|44|120|/|20%) r:0|49px|49px|49px bg:$(sand) h:75vh pt:1rem pb:1rem d:flex flex-direction:column"
   >
-    <BaseSpinner
-      v-if="isLoading && !paintingOrder.length"
-      class="spinner position:absolute top:50% left:50% transform:translate(-50%,-50%)"
-    />
     <h1 class="drawHistory-title text-align:center">繪畫紀錄</h1>
-    <div class="px:32px d:flex gap:16px">
+    <div class="px:16px pb:8px d:flex gap:16px">
       <PdcFilter
         v-model="selectedPokemonIds"
         title="寶可夢"
@@ -24,89 +20,96 @@
         ]"
       />
     </div>
-    <RecycleScroller
-      v-if="paintingOrder.length"
-      ref="virtualScrollerRef"
-      v-slot="{ item }"
-      class="paintings-container overflow:auto pr:1.5rem"
-      :items="paintingOrder"
-      :item-size="482"
-      :item-secondary-size="itemSecondarySize"
-      :grid-items="gridItems"
-      :buffer="900"
-      @scroll-end="handleScrollToEnd"
-      @resize="handleVirtualScrollerResize"
-    >
-      <div class="p:1rem">
-        <div
-          class="painting-wrapper position:relative border:3px|solid|$(black) r:25px height:450px overflow:hidden d:flex:hover_.painting-btns"
-        >
-          <!-- 繪畫標題 -->
+    <!-- Loading Spinner -->
+    <div class="d:flex justify-content:center align-items:center flex:1">
+      <BaseSpinner v-if="isLoading && !paintingOrder.length" />
+    </div>
+    <Transition name="paintingList">
+      <RecycleScroller
+        v-if="paintingOrder.length"
+        ref="virtualScrollerRef"
+        v-slot="{ item }"
+        class="paintings-container overflow:auto pr:1.5rem"
+        :items="paintingOrder"
+        :item-size="482"
+        :item-secondary-size="itemSecondarySize"
+        :grid-items="gridItems"
+        :buffer="900"
+        @scroll-end="handleScrollToEnd"
+        @resize="handleVirtualScrollerResize"
+      >
+        <div class="p:1rem">
           <div
-            class="pokemonName painting-text position:absolute top:10px left:50% transform:translateX(-50%) bg:$(dark-green) color:$(white) r:15px font-size:1rem font-size:1.5rem@sm p:0.25rem|1rem white-space:nowrap"
+            class="painting-wrapper position:relative border:3px|solid|$(black) r:25px height:450px overflow:hidden d:flex:hover_.painting-btns"
           >
-            {{ paintingMap.get(item.id)?.pokemonName }}
+            <!-- 繪畫標題 -->
+            <div
+              class="pokemonName painting-text position:absolute top:10px left:50% transform:translateX(-50%) bg:$(dark-green) color:$(white) r:15px font-size:1rem font-size:1.5rem@sm p:0.25rem|1rem white-space:nowrap"
+            >
+              {{ paintingMap.get(item.id)?.pokemonName }}
+            </div>
+            <!-- 按鈕區 -->
+            <div
+              class="painting-btns position:absolute bottom:10px right:10px d:flex d:none@sm gap:10px"
+            >
+              <BaseButton
+                class="p:0.25rem|0.5rem.base-button p:0.5rem|1rem.base-button@sm"
+                :border="false"
+                background-color="$(green)"
+                text-color="$(white)"
+                @click.stop="
+                  downloadPainting(
+                    paintingMap.get(item.id)?.paintingUrl!,
+                    paintingMap.get(item.id)?.pokemonName!,
+                  )
+                "
+              >
+                下載
+              </BaseButton>
+              <BaseButton
+                class="p:0.25rem|0.5rem.base-button p:0.5rem|1rem.base-button@sm"
+                :border="false"
+                background-color="$(like-fill)"
+                text-color="$(white)"
+                @click.stop="deletePainting(paintingMap.get(item.id)?.id!)"
+              >
+                刪除
+              </BaseButton>
+              <BaseButton
+                :class="[paintingMap.get(item.id)?.isShared! && 'shared']"
+                class="p:0.25rem|0.5rem.base-button p:0.5rem|1rem.base-button@sm d:none.shared:hover_span content:'取消分享'.shared:hover::before"
+                :border="false"
+                :background-color="
+                  paintingMap.get(item.id)?.isShared
+                    ? '$(grey)'
+                    : '$(pokemon-blue)'
+                "
+                text-color="$(white)"
+                @click.stop="
+                  toggleIsShared(
+                    paintingMap.get(item.id)?.id!,
+                    paintingMap.get(item.id)?.isShared!,
+                  )
+                "
+              >
+                <span>{{
+                  getShareBtnText(paintingMap.get(item.id)?.isShared!)
+                }}</span>
+              </BaseButton>
+            </div>
+            <!-- 圖片 -->
+            <div
+              :style="{
+                backgroundImage: `url(${paintingMap.get(item.id)?.paintingUrl})`,
+              }"
+              class="painting h:100% background-size:cover background-position:center cursor:zoom-in"
+              @click="setFocusImage(paintingMap.get(item.id)?.paintingUrl!)"
+            ></div>
           </div>
-          <!-- 按鈕區 -->
-          <div
-            class="painting-btns position:absolute bottom:10px right:10px d:flex d:none@sm gap:10px"
-          >
-            <BaseButton
-              class="p:0.25rem|0.5rem.base-button p:0.5rem|1rem.base-button@sm"
-              :border="false"
-              background-color="$(green)"
-              text-color="$(white)"
-              @click.stop="
-                downloadPainting(
-                  paintingMap.get(item.id)?.paintingUrl!,
-                  paintingMap.get(item.id)?.pokemonName!,
-                )
-              "
-            >
-              下載
-            </BaseButton>
-            <BaseButton
-              class="p:0.25rem|0.5rem.base-button p:0.5rem|1rem.base-button@sm"
-              :border="false"
-              background-color="$(like-fill)"
-              text-color="$(white)"
-              @click.stop="deletePainting(paintingMap.get(item.id)?.id!)"
-            >
-              刪除
-            </BaseButton>
-            <BaseButton
-              :class="[paintingMap.get(item.id)?.isShared! && 'shared']"
-              class="p:0.25rem|0.5rem.base-button p:0.5rem|1rem.base-button@sm d:none.shared:hover_span content:'取消分享'.shared:hover::before"
-              :border="false"
-              :background-color="
-                paintingMap.get(item.id)?.isShared
-                  ? '$(grey)'
-                  : '$(pokemon-blue)'
-              "
-              text-color="$(white)"
-              @click.stop="
-                toggleIsShared(
-                  paintingMap.get(item.id)?.id!,
-                  paintingMap.get(item.id)?.isShared!,
-                )
-              "
-            >
-              <span>{{
-                getShareBtnText(paintingMap.get(item.id)?.isShared!)
-              }}</span>
-            </BaseButton>
-          </div>
-          <!-- 圖片 -->
-          <div
-            :style="{
-              backgroundImage: `url(${paintingMap.get(item.id)?.paintingUrl})`,
-            }"
-            class="painting h:100% background-size:cover background-position:center cursor:zoom-in"
-            @click="setFocusImage(paintingMap.get(item.id)?.paintingUrl!)"
-          ></div>
         </div>
-      </div>
-    </RecycleScroller>
+      </RecycleScroller>
+    </Transition>
+    <!-- 無資料顯示 -->
     <div
       v-if="!isLoading && !paintingOrder.length"
       class="d:flex justify-content:center align-items:center flex:1 font-size:32px color:$(grey)"
@@ -183,8 +186,8 @@ async function deletePainting(id: string) {
     confirmText: '刪除',
     cancelText: '取消',
     async onConfirm() {
-  await apiDeletePainting(id);
-  paintingMap.value.delete(id);
+      await apiDeletePainting(id);
+      paintingMap.value.delete(id);
       paintingOrder.value = paintingOrder.value.filter(
         (item) => item.id !== id,
       );

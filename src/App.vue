@@ -83,6 +83,16 @@ a {
   max-width: unset;
 }
 
+.paintingList-enter-active,
+.paintingList-leave-active {
+  transition: all 0.5s ease;
+}
+.paintingList-enter-from,
+.paintingList-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 @media (max-width: 576px) {
   .main {
     width: 90%;
