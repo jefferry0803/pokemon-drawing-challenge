@@ -3,7 +3,7 @@
     <main class="main">
       <LoginState :username="userStore.username" />
       <PdcLogo />
-      <NavBar />
+      <NavBar v-if="isRouteReady" />
       <RouterView />
       <PdcDialog />
       <div class="background-reference">
@@ -25,6 +25,16 @@ import { useUserStore } from './stores/user';
 import '@master/css';
 import { provideDialog } from '@/composables/useDialog';
 import PdcDialog from '@/components/PdcDialog.vue';
+import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+
+const router = useRouter();
+const isRouteReady = ref(false);
+
+onMounted(async () => {
+  await router.isReady();
+  isRouteReady.value = true;
+});
 
 provideDialog();
 
