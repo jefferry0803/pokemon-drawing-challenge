@@ -16,7 +16,7 @@ async function apiGetUserList(
   sort: QueryOrderByConstraint = orderBy('username', 'asc'),
 ) {
   const q = query(collection(db, 'users'), sort);
-  return await getDocs(q);
+  return getDocs(q);
 }
 
 /**
