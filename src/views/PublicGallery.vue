@@ -30,8 +30,11 @@
       />
     </div>
     <!-- Loading Spinner -->
-    <div class="d:flex justify-content:center align-items:center flex:1">
-      <BaseSpinner v-if="isLoading && !paintingOrder.length" />
+    <div
+      v-if="isLoading && !paintingOrder.length"
+      class="d:flex justify-content:center align-items:center flex:1"
+    >
+      <BaseSpinner />
     </div>
     <Transition name="paintingList">
       <RecycleScroller

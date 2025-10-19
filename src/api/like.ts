@@ -16,7 +16,7 @@ async function apiAddLike(
   currentLikesCount: number,
 ): Promise<void> {
   const paintingRef = doc(db, 'draw-history', paintingId);
-  return await updateDoc(paintingRef, {
+  return updateDoc(paintingRef, {
     likers: arrayUnion(data),
     likesCount: currentLikesCount + 1,
   });

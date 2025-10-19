@@ -28,7 +28,7 @@ import type {
  */
 async function apiGetPainting(paintingId: string) {
   const paintingRef = doc(db, 'draw-history', paintingId);
-  return await getDoc(paintingRef);
+  return getDoc(paintingRef);
 }
 
 /**
@@ -48,7 +48,7 @@ async function apiGetPaintingList(
     limit(perPage),
     ...(lastVisiblePainting ? [startAfter(lastVisiblePainting)] : []),
   );
-  return await getDocs(q);
+  return getDocs(q);
 }
 
 /**
@@ -67,7 +67,7 @@ async function apiGetPaintingCount(
 > {
   const drawHistoryRef = collection(db, 'draw-history');
   const q = query(drawHistoryRef, ...filter);
-  return await getCountFromServer(q);
+  return getCountFromServer(q);
 }
 
 /**
@@ -90,7 +90,7 @@ async function apiUpdatePainting(
   data: Record<string, any>,
 ): Promise<void> {
   const paintingRef = doc(db, 'draw-history', paintingId);
-  return await updateDoc(paintingRef, data);
+  return updateDoc(paintingRef, data);
 }
 
 /**
@@ -98,7 +98,7 @@ async function apiUpdatePainting(
  */
 async function apiDeletePainting(paintingId: string): Promise<void> {
   const paintingRef = doc(db, 'draw-history', paintingId);
-  return await deleteDoc(paintingRef);
+  return deleteDoc(paintingRef);
 }
 
 export {

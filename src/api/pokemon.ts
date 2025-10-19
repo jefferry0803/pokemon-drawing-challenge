@@ -6,7 +6,7 @@ import { db } from '@/firebase';
  */
 async function apiGetPokemonList() {
   const q = query(collection(db, 'pokemons'));
-  return await getDocs(q);
+  return getDocs(q);
 }
 
 /**
@@ -14,7 +14,7 @@ async function apiGetPokemonList() {
  */
 async function apiGetPokemon(pokemonId: string) {
   const pokemonRef = doc(db, 'pokemons', pokemonId);
-  return await getDoc(pokemonRef);
+  return getDoc(pokemonRef);
 }
 
 export { apiGetPokemonList, apiGetPokemon };
