@@ -10,9 +10,16 @@ export interface DialogOptions {
   showCancel?: boolean;
 }
 
+export interface Dialog {
+  isOpen: ReturnType<typeof ref<boolean>>;
+  currentDialog: ReturnType<typeof ref<DialogOptions | null>>;
+  showDialog: (options: DialogOptions) => void;
+  hideDialog: () => void;
+}
+
 const DialogSymbol = Symbol('dialog');
 
-export function provideDialog() {
+export function provideDialog(): Dialog {
   const isOpen = ref(false);
   const currentDialog = ref<DialogOptions | null>(null);
 
@@ -34,7 +41,7 @@ export function provideDialog() {
     currentDialog.value = null;
   };
 
-  const dialog = {
+  const dialog: Dialog = {
     isOpen,
     currentDialog,
     showDialog,
@@ -45,8 +52,8 @@ export function provideDialog() {
   return dialog;
 }
 
-export function useDialog() {
-  const dialog = inject(DialogSymbol);
+export function useDialog(): Dialog {
+  const dialog = inject<Dialog>(DialogSymbol);
   if (!dialog) {
     throw new Error('useDialog must be used after provideDialog');
   }

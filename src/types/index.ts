@@ -9,4 +9,5 @@ export type Painting = {
   isShared?: boolean;
   created?: Date;
   likers?: createLikeData[];
+  likesCount?: number;
 };
