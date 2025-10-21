@@ -32,7 +32,9 @@
             <div>1</div>
           </template>
         </PdcSlider>
-        <div class="d:grid grid-template-columns:50px|50px gap:1rem">
+        <div
+          class="d:grid grid-template-columns:repeat(2,50px)@2xl grid-template-columns:repeat(3,50px) gap:1rem"
+        >
           <div
             v-for="color in paletteColors"
             :key="color"
@@ -541,12 +543,13 @@ onUnmounted(() => {
 .sidebar {
   position: absolute;
   right: 20px;
-  top: 48%;
-  transform: translateY(-50%);
+  top: 50%;
+  transform: translateY(calc(-50% - 10px));
   background: var(--sand);
   padding: 1rem;
   border-radius: 20px;
   transition: all 0.5s ease;
+  max-height: calc(100% - 60px);
 }
 .sidebar.hide {
   transform: translate(calc(100% + 20px), -50%);
