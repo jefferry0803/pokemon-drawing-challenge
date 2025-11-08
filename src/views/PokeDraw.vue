@@ -18,6 +18,7 @@
           </div>
         </template>
       </div>
+      <!-- 側邊欄 -->
       <div class="sidebar d:flex gap:16px" :class="{ hide: !isSidebarShow }">
         <div class="sidebar-hideBtn" @click="toggleSidebar">
           {{ hideSidebarBtn }}
@@ -33,7 +34,7 @@
           </template>
         </PdcSlider>
         <div
-          class="d:grid grid-template-columns:repeat(2,50px)@2xl grid-template-columns:repeat(3,50px) gap:1rem"
+          class="d:grid grid-template-columns:repeat(2,50px)@3xl grid-template-columns:repeat(3,50px) gap:1rem"
         >
           <div
             v-for="color in paletteColors"
@@ -83,6 +84,7 @@
           </div>
         </div>
       </div>
+      <!-- 畫板 -->
       <div ref="canvasContainer" class="canvas-container">
         <canvas
           ref="pokeCanvas"
@@ -90,7 +92,7 @@
           @touchmove.prevent
           @pointerdown.prevent="handleMouseDown"
           @pointermove.prevent="handleMouseMove"
-          @pointerup.prevent="handleMousUp"
+          @pointerup.prevent="handleMouseUp"
         />
       </div>
       <div class="timeBar-outer">
@@ -99,6 +101,7 @@
           class="timeBar-inner"
         />
       </div>
+      <!-- 開始提示 modal -->
       <BaseModal ref="startModal">
         <template #title> 遊戲規則 </template>
         <template #content>
@@ -114,6 +117,7 @@
           </button>
         </template>
       </BaseModal>
+      <!-- 結果 modal -->
       <ResultModal
         ref="resultModal"
         :pokemon-img-url="pokemonImgUrl"
@@ -169,7 +173,7 @@ function startTimer() {
  * 時間到
  */
 async function timesUp() {
-  handleMousUp();
+  handleMouseUp();
   ctx.value.globalCompositeOperation = 'destination-over';
   ctx.value.fillStyle = '#fff';
   ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
@@ -283,18 +287,31 @@ function resizeCanvas() {
   pokeCanvas.value.height = window.innerHeight * 0.7;
 }
 function handleMouseDown(e) {
+  const rect = pokeCanvas.value.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  // 油漆桶工具，確保座標在 canvas 範圍內
   if (currentTool.value === TOOLS.FILL) {
-    floodFill(e.offsetX, e.offsetY, currentColor.value);
+    if (
+      x >= 0 &&
+      x < pokeCanvas.value.width &&
+      y >= 0 &&
+      y < pokeCanvas.value.height
+    ) {
+      floodFill(Math.floor(x), Math.floor(y), currentColor.value);
+    }
     return;
   }
 
+  // 其他工具的處理
   isMouseDown.value = true;
-  lastX = e.offsetX;
-  lastY = e.offsetY;
+  lastX = x;
+  lastY = y;
   if (isMouseDown.value) {
     ctx.value.beginPath();
     ctx.value.moveTo(lastX, lastY);
-    ctx.value.lineTo(e.offsetX, e.offsetY);
+    ctx.value.lineTo(x, y);
     ctx.value.stroke();
   }
 }
@@ -309,7 +326,7 @@ function handleMouseMove(e) {
     lastY = e.offsetY;
   }
 }
-function handleMousUp() {
+function handleMouseUp() {
   isMouseDown.value = false;
   saveHistory();
 }
