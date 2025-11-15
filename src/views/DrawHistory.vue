@@ -283,7 +283,7 @@ async function setPokemonFilterOptions() {
 }
 
 const debounceSearch = useDebounceFn(() => {
-  const filters = [where('isShared', '==', true)];
+  const filters = [where('userId', '==', userStore.userId)];
 
   if (selectedPokemonIds.value.length) {
     filters.push(where('pokemonId', 'in', selectedPokemonIds.value));
