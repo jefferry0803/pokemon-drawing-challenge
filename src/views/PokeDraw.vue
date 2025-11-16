@@ -144,12 +144,14 @@ import { apiCreatePainting } from '@/api/painting';
 import PdcIcon from '@/components/PdcIcon.vue';
 import PdcSlider from '@/components/PdcSlider.vue';
 import { apiGetPokemon } from '@/api/pokemon';
+import { useImageSimilarity } from '@/composables/useImageSimilarity';
 
 const { paletteColors } = useCanvas();
 const userStore = useUserStore();
+const { computeSimilarity, similarity } = useImageSimilarity();
 
 // 遊戲機制相關
-let secondsLeft = ref(60);
+let secondsLeft = ref(10);
 let timer = ref(null);
 const startModal = ref(null);
 const resultModal = ref(null);
@@ -178,6 +180,9 @@ async function timesUp() {
   ctx.value.fillStyle = '#fff';
   ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
   pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
+
+  await computeSimilarity(pokeCanvas.value, pokemonImgUrl.value);
+  console.log(`相似度: ${similarity.value}%`);
 
   if (userStore.isLogin) {
     isSavingResult.value = true;
