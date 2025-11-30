@@ -43,6 +43,15 @@
               <img class="w:100%" :src="pokemonDrawUrl" alt="" />
             </div>
           </div>
+          <p class="text-align:center font-size:24px">
+            相似度:
+            <span
+              :class="scoreColorClass"
+              class="font-weight:600 font-size:48px"
+              >{{ displayScore }}</span
+            >
+            %
+          </p>
           <p v-if="!userStore.isLogin" class="text-center mt-3 mb-0">
             您目前沒有登入，畫作將不會保存，要不要考慮
             <router-link to="/login"> 登入 </router-link>
@@ -130,15 +139,57 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  similarityScore: {
+    type: Number,
+    default: 0,
+  },
 });
 defineExpose({ showModal });
 const userStore = useUserStore();
 const modal = ref(null);
 const paintingId = ref('');
 let isShared = ref(false);
+const displayScore = ref(0);
+let animationTimer = null;
 const shareBtnText = computed(() => {
   return isShared.value ? '已分享' : '分享到畫廊';
 });
+const scoreColorClass = computed(() => {
+  if (displayScore.value <= 40) {
+    return 'score-low';
+  }
+  if (displayScore.value <= 70) {
+    return 'score-mid';
+  }
+  return 'score-high';
+});
+
+/**
+ * 分數動畫函數 - 從 0 跑到目標分數
+ */
+function animateScore() {
+  if (animationTimer) {
+    clearInterval(animationTimer);
+  }
+
+  displayScore.value = 0;
+  const targetScore = props.similarityScore;
+  const duration = 1000; // 1 秒動畫時間
+  const steps = 30; // 30 幀
+  const increment = targetScore / steps;
+  let currentStep = 0;
+
+  animationTimer = setInterval(() => {
+    currentStep++;
+    if (currentStep >= steps) {
+      displayScore.value = targetScore;
+      clearInterval(animationTimer);
+      animationTimer = null;
+    } else {
+      displayScore.value = Math.round(increment * currentStep);
+    }
+  }, duration / steps);
+}
 
 /**
  * 重置遊戲
@@ -172,6 +223,10 @@ function showModal(id) {
   paintingId.value = id;
   isShared.value = false;
   modal.value.show();
+  // 等待 modal 動畫完成後再開始分數動畫
+  setTimeout(() => {
+    animateScore();
+  }, 300);
 }
 /**
  * 關閉彈窗
@@ -184,6 +239,24 @@ onMounted(() => {
   modal.value = new Modal('#resultModal');
 });
 onUnmounted(() => {
+  if (animationTimer) {
+    clearInterval(animationTimer);
+    animationTimer = null;
+  }
   hideModal();
 });
 </script>
+
+<style scoped>
+.score-low {
+  color: var(--dark-grey-text);
+}
+
+.score-mid {
+  color: var(--score-mid);
+}
+
+.score-high {
+  color: var(--green);
+}
+</style>

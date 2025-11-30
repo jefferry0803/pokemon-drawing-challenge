@@ -99,6 +99,7 @@ export function usePaintingList(
         likers: doc.data().likers || [],
         likesCount: doc.data().likesCount || 0,
         created: new Date(doc.data().created.seconds * 1000),
+        similarityScore: doc.data().similarityScore || 0,
       };
       paintingMap.value.set(painting.id, painting);
       if (!paintingOrder.value.some((p) => p.id === painting.id)) {

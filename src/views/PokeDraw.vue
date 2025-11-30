@@ -123,10 +123,14 @@
         :pokemon-img-url="pokemonImgUrl"
         :pokemon-draw-url="pokemonDrawUrl"
         :pokemon-name="pokemonName"
+        :similarity-score="similarityScore"
         @reset="reset"
         @to-draw-history="router.push({ path: '/history' })"
       />
-      <LoadingDots v-if="isSavingResult" :title="'結果儲存中'" />
+      <LoadingDots
+        v-if="isSavingResult || isCalculatingSimilarity"
+        :title="loadingMessage"
+      />
     </div>
   </div>
 </template>
@@ -144,9 +148,11 @@ import { apiCreatePainting } from '@/api/painting';
 import PdcIcon from '@/components/PdcIcon.vue';
 import PdcSlider from '@/components/PdcSlider.vue';
 import { apiGetPokemon } from '@/api/pokemon';
+import { useImageSimilarity } from '@/composables/useImageSimilarity';
 
 const { paletteColors } = useCanvas();
 const userStore = useUserStore();
+const { preloadModel, computeSimilarity, similarity } = useImageSimilarity();
 
 // 遊戲機制相關
 let secondsLeft = ref(60);
@@ -154,6 +160,17 @@ let timer = ref(null);
 const startModal = ref(null);
 const resultModal = ref(null);
 let isSavingResult = ref(false);
+const isCalculatingSimilarity = ref(false);
+const similarityScore = ref(0);
+
+let loadingMessage = computed(() => {
+  if (isCalculatingSimilarity.value) {
+    return '相似度計算中';
+  } else if (isSavingResult.value) {
+    return '結果儲存中';
+  }
+  return '';
+});
 
 /**
  * 開始計時
@@ -179,6 +196,12 @@ async function timesUp() {
   ctx.value.fillRect(0, 0, pokeCanvas.value.width, pokeCanvas.value.height);
   pokemonDrawUrl.value = pokeCanvas.value.toDataURL();
 
+  isCalculatingSimilarity.value = true;
+  await computeSimilarity(pokeCanvas.value, pokemonImgUrl.value);
+  const score = (similarity.value * 100).toFixed(2);
+  similarityScore.value = Number(score);
+  isCalculatingSimilarity.value = false;
+
   if (userStore.isLogin) {
     isSavingResult.value = true;
     const response = await saveResult();
@@ -196,6 +219,7 @@ async function timesUp() {
 function reset() {
   getPokemon();
   secondsLeft.value = 60;
+  similarityScore.value = 0;
   undoList.value = [];
   redoList.value = [];
   allClear();
@@ -215,6 +239,7 @@ function saveResult() {
     userId: userStore.userId,
     username: userStore.username,
     isShared: false,
+    similarityScore: similarityScore.value,
   });
 }
 
@@ -242,9 +267,14 @@ async function getPokemon() {
   pokemonName.value = data.chName;
   pokemonColor.value = data.color;
   pokemonDesc.value = data.description;
-  pokemonImgUrl.value = `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pokemonId.value.padStart(3, '0')}.png`;
+  // 使用 CORS 代理來載入官方圖片
+  const officialImageUrl = `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pokemonId.value.padStart(3, '0')}.png`;
+  pokemonImgUrl.value = `https://corsproxy.io/?url=${officialImageUrl}`;
   isPokemonLoading.value = false;
+  // 開始計時
   startTimer();
+  // 在背景預載模型（不阻塞主線程）
+  preloadModel();
 }
 /**
  * 依照範圍取得隨機數
