@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 
 export function useImageSimilarity() {
   const similarity = ref<number | null>(null);
@@ -147,6 +147,19 @@ export function useImageSimilarity() {
       return null;
     }
   };
+
+  /** 終止 Worker 並釋放記憶體 */
+  const terminateWorker = () => {
+    if (modelWorker) {
+      modelWorker.terminate();
+      modelWorker = null;
+    }
+  };
+
+  /** 元件卸載時自動清理 Worker */
+  onUnmounted(() => {
+    terminateWorker();
+  });
 
   return {
     similarity,
