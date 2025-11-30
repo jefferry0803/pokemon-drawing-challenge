@@ -6,8 +6,21 @@ export type Painting = {
   pokemonName: string;
   userId: string;
   username: string;
+  isShared: boolean;
+  created: Date;
+  likers: createLikeData[];
+  likesCount: number;
+  similarityScore: number;
+};
+
+export type PaintingUpdate = {
+  paintingUrl?: string;
+  pokemonName?: string;
+  userId?: string;
+  username?: string;
   isShared?: boolean;
   created?: Date;
   likers?: createLikeData[];
   likesCount?: number;
+  similarityScore?: number;
 };

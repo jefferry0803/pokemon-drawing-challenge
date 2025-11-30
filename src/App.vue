@@ -72,6 +72,7 @@ userStore.autoLogin();
   --input-bg-disabled: #f5f7fa;
   --input-fg-disabled: #a8abb2;
   --overlay-bg: #000000b3;
+  --score-mid: #ff9900;
 }
 
 body {

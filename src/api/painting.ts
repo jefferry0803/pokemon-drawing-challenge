@@ -22,6 +22,7 @@ import type {
   DocumentData,
   DocumentSnapshot,
 } from 'firebase/firestore';
+import type { Painting, PaintingUpdate } from '@/types';
 
 /**
  * 取得單一繪畫資料
@@ -73,9 +74,7 @@ async function apiGetPaintingCount(
 /**
  * 新增繪畫記錄
  */
-async function apiCreatePainting(
-  data: Record<string, any>,
-): Promise<Record<string, any>> {
+async function apiCreatePainting(data: Painting): Promise<Record<string, any>> {
   return addDoc(collection(db, 'draw-history'), {
     ...data,
     created: serverTimestamp(),
@@ -87,7 +86,7 @@ async function apiCreatePainting(
  */
 async function apiUpdatePainting(
   paintingId: string,
-  data: Record<string, any>,
+  data: PaintingUpdate,
 ): Promise<void> {
   const paintingRef = doc(db, 'draw-history', paintingId);
   return updateDoc(paintingRef, data);
